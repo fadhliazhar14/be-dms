@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BE-DMS - Dokumentasi Source Code</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3, h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        h1 {
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin: 30px 0 20px 0;
+        }
+        h3 {
+            color: #27ae60;
+            border-left: 4px solid #27ae60;
+            padding-left: 15px;
+            margin: 25px 0 15px 0;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            padding: 25px;
+            border-left: 4px solid #3498db;
+        }
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            margin: 15px 0;
+            border-left: 4px solid #e74c3c;
+        }
+        .endpoint {
+            background: #e8f5e8;
+            border-left: 4px solid #27ae60;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .method {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .get { background: #27ae60; }
+        .post { background: #3498db; }
+        .put { background: #f39c12; }
+        .delete { background: #e74c3c; }
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .tech-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #34495e;
+            color: white;
+            font-weight: 600;
+        }
+        tr:hover {
+            background: #f5f5f5;
+        }
+        .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+        }
+        .implemented { background: #27ae60; }
+        .not-implemented { background: #95a5a6; }
+        .nav {
+            background: #34495e;
+            padding: 15px 0;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+        .nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .nav li {
+            margin: 0 15px;
+        }
+        .nav a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        .nav a:hover {
+            background: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏦 BE-DMS (Backend Document Management System)</h1>
+        <p style="text-align: center; font-size: 18px; color: #7f8c8d; margin-bottom: 30px;">
+            Dokumentasi Source Code Project - Bank DKI
+        </p>
+
+        <nav class="nav">
+            <ul>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#architecture">Arsitektur</a></li>
+                <li><a href="#entities">Entities</a></li>
+                <li><a href="#repositories">Repositories</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#controllers">Controllers</a></li>
+                <li><a href="#security">Security</a></li>
+                <li><a href="#api">API Endpoints</a></li>
+            </ul>
+        </nav>
+
+        <section id="overview" class="card">
+            <h2>📋 Project Overview</h2>
+            <p><strong>BE-DMS</strong> adalah backend system untuk Document Management System yang dikembangkan untuk Bank DKI. 
+            Aplikasi ini dibangun menggunakan Spring Boot framework dengan arsitektur REST API dan implementasi security menggunakan JWT.</p>
+            
+            <h3>🛠 Technology Stack</h3>
+            <div class="tech-stack">
+                <div class="tech-item">
+                    <strong>Java 21</strong><br>
+                    <small>Programming Language</small>
+                </div>
+                <div class="tech-item">
+                    <strong>Spring Boot 3.5.4</strong><br>
+                    <small>Application Framework</small>
+                </div>
+                <div class="tech-item">
+                    <strong>Spring Security</strong><br>
+                    <small>Authentication & Authorization</small>
+                </div>
+                <div class="tech-item">
+                    <strong>Spring Data JPA</strong><br>
+                    <small>Data Access Layer</small>
+                </div>
+                <div class="tech-item">
+                    <strong>MySQL</strong><br>
+                    <small>Database</small>
+                </div>
+                <div class="tech-item">
+                    <strong>JWT (JSON Web Token)</strong><br>
+                    <small>Token Authentication</small>
+                </div>
+                <div class="tech-item">
+                    <strong>Lombok</strong><br>
+                    <small>Code Generation</small>
+                </div>
+                <div class="tech-item">
+                    <strong>Maven</strong><br>
+                    <small>Build Tool</small>
+                </div>
+            </div>
+
+            <h3>📦 Project Structure</h3>
+            <div class="code-block">
+src/main/java/com/bank_dki/be_dms/
+├── config/           # Konfigurasi aplikasi
+├── controller/       # REST API Controllers
+├── dto/             # Data Transfer Objects
+├── entity/          # JPA Entities
+├── repository/      # Data Access Layer
+├── security/        # Security Components
+├── service/         # Business Logic Layer
+└── util/           # Utility Classes
+            </div>
+        </section>
+
+        <section id="architecture" class="card">
+            <h2>🏗 Arsitektur Aplikasi</h2>
+            <p>BE-DMS mengimplementasikan <strong>layered architecture</strong> dengan pemisahan concern yang jelas:</p>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Layer</th>
+                            <th>Package</th>
+                            <th>Responsibility</th>
+                            <th>Components</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Presentation Layer</strong></td>
+                            <td>controller</td>
+                            <td>Handle HTTP requests dan responses</td>
+                            <td>AuthController, AdminController, RoleController</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Business Layer</strong></td>
+                            <td>service</td>
+                            <td>Implementasi business logic</td>
+                            <td>AuthService, RoleService, UserDetailsServiceImpl</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Data Access Layer</strong></td>
+                            <td>repository</td>
+                            <td>Data persistence operations</td>
+                            <td>UserRepository, RoleRepository</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Data Transfer Layer</strong></td>
+                            <td>dto</td>
+                            <td>Object transfer antar layer</td>
+                            <td>LoginRequest, JwtResponse, SignupRequest</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Domain Layer</strong></td>
+                            <td>entity</td>
+                            <td>Business domain representation</td>
+                            <td>User, Role</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="entities" class="card">
+            <h2>🗄 Database Entities</h2>
+            
+            <h3>User Entity</h3>
+            <p>Entity untuk menyimpan informasi pengguna sistem.</p>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Type</th>
+                            <th>Constraints</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>id</td>
+                            <td>Long</td>
+                            <td>@Id, @GeneratedValue</td>
+                            <td>Primary key</td>
+                        </tr>
+                        <tr>
+                            <td>username</td>
+                            <td>String</td>
+                            <td>unique, nullable = false</td>
+                            <td>Username unik untuk login</td>
+                        </tr>
+                        <tr>
+                            <td>email</td>
+                            <td>String</td>
+                            <td>unique, nullable = false</td>
+                            <td>Email address unik</td>
+                        </tr>
+                        <tr>
+                            <td>password</td>
+                            <td>String</td>
+                            <td>nullable = false</td>
+                            <td>Password terenkripsi</td>
+                        </tr>
+                        <tr>
+                            <td>enabled</td>
+                            <td>Boolean</td>
+                            <td>nullable = false, default = true</td>
+                            <td>Status aktif/non-aktif</td>
+                        </tr>
+                        <tr>
+                            <td>createdAt</td>
+                            <td>LocalDateTime</td>
+                            <td>nullable = false</td>
+                            <td>Timestamp pembuatan</td>
+                        </tr>
+                        <tr>
+                            <td>updatedAt</td>
+                            <td>LocalDateTime</td>
+                            <td></td>
+                            <td>Timestamp update terakhir</td>
+                        </tr>
+                        <tr>
+                            <td>roles</td>
+                            <td>Set&lt;Role&gt;</td>
+                            <td>@ManyToMany, FetchType.LAZY</td>
+                            <td>Relasi many-to-many dengan Role</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Role Entity</h3>
+            <p>Entity untuk menyimpan peran/role dalam sistem.</p>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Type</th>
+                            <th>Constraints</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>id</td>
+                            <td>Long</td>
+                            <td>@Id, @GeneratedValue</td>
+                            <td>Primary key</td>
+                        </tr>
+                        <tr>
+                            <td>name</td>
+                            <td>String</td>
+                            <td>unique, nullable = false</td>
+                            <td>Nama role (ADMIN, OPERATOR)</td>
+                        </tr>
+                        <tr>
+                            <td>description</td>
+                            <td>String</td>
+                            <td>length = 500</td>
+                            <td>Deskripsi role</td>
+                        </tr>
+                        <tr>
+                            <td>users</td>
+                            <td>Set&lt;User&gt;</td>
+                            <td>@ManyToMany(mappedBy = "roles"), @JsonIgnore</td>
+                            <td>Relasi balik ke User</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Database Schema</h3>
+            <div class="code-block">
+-- Tables
+CREATE TABLE users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME
+);
+
+CREATE TABLE roles (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) UNIQUE NOT NULL,
+    description VARCHAR(500)
+);
+
+CREATE TABLE user_roles (
+    user_id BIGINT,
+    role_id BIGINT,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (role_id) REFERENCES roles(id),
+    PRIMARY KEY (user_id, role_id)
+);
+            </div>
+        </section>
+
+        <section id="repositories" class="card">
+            <h2>🗃 Repository Layer</h2>
+            <p>Layer data access menggunakan Spring Data JPA dengan custom queries JPQL.</p>
+
+            <h3>UserRepository</h3>
+            <div class="code-block">
+public interface UserRepository extends JpaRepository&lt;User, Long&gt; {
+    Optional&lt;User&gt; findByUsername(String username);
+    Optional&lt;User&gt; findByEmail(String email);
+    Optional&lt;User&gt; findByUsernameOrEmail(String username, String email);
+    Boolean existsByUsername(String username);
+    Boolean existsByEmail(String email);
+    
+    // JPQL queries dengan JOIN FETCH untuk eager loading
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.roles WHERE u.username = :usernameOrEmail OR u.email = :usernameOrEmail")
+    Optional&lt;User&gt; findByUsernameOrEmailWithRoles(@Param("usernameOrEmail") String usernameOrEmail);
+    
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.roles")
+    List&lt;User&gt; findAllWithRoles();
+}
+            </div>
+
+            <h3>RoleRepository</h3>
+            <div class="code-block">
+public interface RoleRepository extends JpaRepository&lt;Role, Long&gt; {
+    Optional&lt;Role&gt; findByName(String name);
+    Boolean existsByName(String name);
+}
+            </div>
+
+            <h3>Key Features</h3>
+            <ul>
+                <li><strong>JPQL Queries:</strong> Menggunakan Java Persistence Query Language untuk database independence</li>
+                <li><strong>Eager Loading:</strong> LEFT JOIN FETCH untuk menghindari N+1 query problem</li>
+                <li><strong>Method Naming:</strong> Menggunakan Spring Data JPA method naming convention</li>
+                <li><strong>Custom Queries:</strong> @Query annotation untuk complex queries</li>
+            </ul>
+        </section>
+
+        <section id="services" class="card">
+            <h2>⚙️ Service Layer</h2>
+            <p>Business logic layer yang mengatur alur proses bisnis aplikasi.</p>
+
+            <h3>AuthService</h3>
+            <p>Mengelola proses autentikasi dan registrasi pengguna.</p>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>Parameter</th>
+                            <th>Return Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>authenticateUser</td>
+                            <td>LoginRequest</td>
+                            <td>JwtResponse</td>
+                            <td>Proses login dan generate JWT token</td>
+                        </tr>
+                        <tr>
+                            <td>registerUser</td>
+                            <td>SignupRequest</td>
+                            <td>MessageResponse</td>
+                            <td>Registrasi pengguna baru dengan validasi</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>RoleService</h3>
+            <p>Mengelola operasi CRUD untuk role dan assignment role ke user.</p>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>Parameter</th>
+                            <th>Return Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>getAllRoles</td>
+                            <td>-</td>
+                            <td>List&lt;Role&gt;</td>
+                            <td>Mengambil semua role</td>
+                        </tr>
+                        <tr>
+                            <td>createRole</td>
+                            <td>String name, String description</td>
+                            <td>Role</td>
+                            <td>Membuat role baru</td>
+                        </tr>
+                        <tr>
+                            <td>assignRoleToUser</td>
+                            <td>Long userId, Long roleId</td>
+                            <td>User</td>
+                            <td>Assign role ke user</td>
+                        </tr>
+                        <tr>
+                            <td>removeRoleFromUser</td>
+                            <td>Long userId, Long roleId</td>
+                            <td>User</td>
+                            <td>Remove role dari user</td>
+                        </tr>
+                        <tr>
+                            <td>getUserRoles</td>
+                            <td>Long userId</td>
+                            <td>Set&lt;Role&gt;</td>
+                            <td>Mengambil role user tertentu</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>UserDetailsServiceImpl</h3>
+            <p>Implementasi Spring Security UserDetailsService untuk custom authentication.</p>
+            <div class="code-block">
+@Override
+@Transactional(readOnly = true)
+public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
+    User user = userRepository.findByUsernameOrEmailWithRoles(usernameOrEmail)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found: " + usernameOrEmail));
+    
+    var roleAuthorities = user.getRoles().stream()
+            .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
+            .collect(Collectors.toList());
+    
+    return org.springframework.security.core.userdetails.User.builder()
+            .username(user.getUsername())
+            .password(user.getPassword())
+            .authorities(roleAuthorities)
+            .accountExpired(false)
+            .accountLocked(false)
+            .credentialsExpired(false)
+            .disabled(!user.getEnabled())
+            .build();
+}
+            </div>
+        </section>
+
+        <section id="controllers" class="card">
+            <h2>🎛 Controller Layer</h2>
+            <p>REST API endpoints untuk client-server communication.</p>
+
+            <h3>AuthController</h3>
+            <p>Menangani endpoint untuk autentikasi (login/register).</p>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <strong>/api/auth/signin</strong> - Login pengguna
+                <br><small>Body: LoginRequest → Response: JwtResponse</small>
+            </div>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <strong>/api/auth/signup</strong> - Registrasi pengguna baru
+                <br><small>Body: SignupRequest → Response: MessageResponse</small>
+            </div>
+
+            <h3>AdminController</h3>
+            <p>Endpoint khusus admin untuk manajemen sistem.</p>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <strong>/api/admin/assign-admin-role</strong> - Assign admin role
+                <br><small>Param: email → Response: MessageResponse</small>
+            </div>
+
+            <h3>RoleController</h3>
+            <p>CRUD operations untuk role management.</p>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <strong>/api/roles</strong> - Mengambil semua role
+            </div>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <strong>/api/roles</strong> - Membuat role baru
+            </div>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <strong>/api/roles/assign</strong> - Assign role ke user
+            </div>
+
+            <h3>SetupController</h3>
+            <p>Initial setup endpoints untuk konfigurasi awal sistem.</p>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <strong>/api/setup/make-admin</strong> - Assign admin role manual
+                <br><small>Param: email → Response: MessageResponse</small>
+            </div>
+
+            <h3>TestController</h3>
+            <p>Testing endpoints untuk validasi authorization.</p>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <strong>/api/test/all</strong> - Public access (permitAll)
+            </div>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <strong>/api/test/operator</strong> - Operator/Admin access
+            </div>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <strong>/api/test/admin</strong> - Admin only access
+            </div>
+        </section>
+
+        <section id="security" class="card">
+            <h2>🔐 Security Configuration</h2>
+            <p>Implementasi keamanan menggunakan Spring Security dan JWT.</p>
+
+            <h3>SecurityConfig</h3>
+            <p>Konfigurasi utama security untuk aplikasi.</p>
+            <div class="code-block">
+@Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http.csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(authz -> authz
+            .requestMatchers("/api/auth/**").permitAll()
+            .requestMatchers("/api/setup/**").permitAll()
+            .requestMatchers("/api/test/all").permitAll()
+            .requestMatchers("/api/admin/**").hasRole("ADMIN")
+            .requestMatchers("/api/operator/**").hasAnyRole("ADMIN", "OPERATOR")
+            .anyRequest().authenticated()
+        )
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authenticationProvider(authenticationProvider())
+        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    
+    return http.build();
+}
+            </div>
+
+            <h3>JwtAuthenticationFilter</h3>
+            <p>Custom filter untuk validasi JWT token pada setiap request.</p>
+            <div class="code-block">
+@Override
+protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+        throws ServletException, IOException {
+    
+    final String requestTokenHeader = request.getHeader("Authorization");
+    
+    String username = null;
+    String jwtToken = null;
+    
+    if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
+        jwtToken = requestTokenHeader.substring(7);
+        try {
+            username = jwtUtil.extractUsername(jwtToken);
+        } catch (Exception e) {
+            logger.error("Unable to get JWT Token", e);
+        }
+    }
+    
+    if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        
+        if (jwtUtil.validateToken(jwtToken, userDetails)) {
+            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            usernamePasswordAuthenticationToken
+                    .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+        }
+    }
+    chain.doFilter(request, response);
+}
+            </div>
+
+            <h3>JwtUtil</h3>
+            <p>Utility class untuk operasi JWT token (generate, validate, extract).</p>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>Description</th>
+                            <th>Usage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>generateToken</td>
+                            <td>Generate JWT token dari UserDetails</td>
+                            <td>Login process</td>
+                        </tr>
+                        <tr>
+                            <td>validateToken</td>
+                            <td>Validasi token dengan user details</td>
+                            <td>Authentication filter</td>
+                        </tr>
+                        <tr>
+                            <td>extractUsername</td>
+                            <td>Extract username dari token</td>
+                            <td>User identification</td>
+                        </tr>
+                        <tr>
+                            <td>extractExpiration</td>
+                            <td>Extract expiration date dari token</td>
+                            <td>Token validation</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Authorization Matrix</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Endpoint Pattern</th>
+                            <th>Required Role</th>
+                            <th>Access Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>/api/auth/**</td>
+                            <td>-</td>
+                            <td>Public (permitAll)</td>
+                        </tr>
+                        <tr>
+                            <td>/api/setup/**</td>
+                            <td>-</td>
+                            <td>Public (permitAll)</td>
+                        </tr>
+                        <tr>
+                            <td>/api/test/all</td>
+                            <td>-</td>
+                            <td>Public (permitAll)</td>
+                        </tr>
+                        <tr>
+                            <td>/api/admin/**</td>
+                            <td>ADMIN</td>
+                            <td>Admin Only</td>
+                        </tr>
+                        <tr>
+                            <td>/api/operator/**</td>
+                            <td>ADMIN, OPERATOR</td>
+                            <td>Admin or Operator</td>
+                        </tr>
+                        <tr>
+                            <td>Other endpoints</td>
+                            <td>Any authenticated</td>
+                            <td>Authenticated Users</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="api" class="card">
+            <h2>📡 API Endpoints Reference</h2>
+            
+            <h3>Authentication Endpoints</h3>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <strong>/api/auth/signin</strong>
+                <br><strong>Request Body:</strong>
+                <div class="code-block">
+{
+    "usernameOrEmail": "admin@example.com",
+    "password": "password123"
+}
+                </div>
+                <strong>Response:</strong>
+                <div class="code-block">
+{
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "type": "Bearer",
+    "username": "admin",
+    "email": "admin@example.com",
+    "roles": ["ADMIN"]
+}
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <strong>/api/auth/signup</strong>
+                <br><strong>Request Body:</strong>
+                <div class="code-block">
+{
+    "username": "newuser",
+    "email": "newuser@example.com",
+    "password": "password123",
+    "roles": ["OPERATOR"]
+}
+                </div>
+                <strong>Response:</strong>
+                <div class="code-block">
+{
+    "message": "User registered successfully!"
+}
+                </div>
+            </div>
+
+            <h3>Admin Endpoints</h3>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <strong>/api/admin/assign-admin-role?email=user@example.com</strong>
+                <br><strong>Headers:</strong> Authorization: Bearer {token}
+                <br><strong>Required Role:</strong> ADMIN
+            </div>
+
+            <h3>Setup Endpoints</h3>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <strong>/api/setup/make-admin?email=user@example.com</strong>
+                <br><strong>Description:</strong> Initial admin setup (public access)
+            </div>
+
+            <h3>Test Endpoints</h3>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <strong>/api/test/all</strong> - Public content
+            </div>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <strong>/api/test/operator</strong> - Operator/Admin content
+            </div>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <strong>/api/test/admin</strong> - Admin only content
+            </div>
+
+            <h3>Error Responses</h3>
+            <div class="code-block">
+// Bad Request (400)
+{
+    "message": "Error: Username is already taken!"
+}
+
+// Unauthorized (401)
+{
+    "message": "Error: Unauthorized"
+}
+
+// Forbidden (403)
+{
+    "message": "Error: Access Denied"
+}
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>🚀 Deployment & Configuration</h2>
+            
+            <h3>Application Properties</h3>
+            <p>Konfigurasi yang perlu disiapkan:</p>
+            <div class="code-block">
+# Database Configuration
+spring.datasource.url=jdbc:mysql://localhost:3306/be_dms
+spring.datasource.username=your_username
+spring.datasource.password=your_password
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+
+# JWT Configuration
+jwt.secret=mySecretKey
+jwt.expiration=86400000
+
+# Server Configuration
+server.port=8080
+            </div>
+
+            <h3>Build & Run</h3>
+            <div class="code-block">
+# Build project
+./mvnw clean compile
+
+# Run tests
+./mvnw test
+
+# Package application
+./mvnw clean package
+
+# Run application
+./mvnw spring-boot:run
+
+# Or run JAR file
+java -jar target/be-dms-0.0.1-SNAPSHOT.war
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>📚 Development Notes</h2>
+            
+            <h3>Best Practices Implemented</h3>
+            <ul>
+                <li><strong>JPQL over Native SQL:</strong> Database independence dengan JPQL</li>
+                <li><strong>Proper Exception Handling:</strong> Custom exception handling di controllers</li>
+                <li><strong>DTO Pattern:</strong> Separation of concern dengan DTO objects</li>
+                <li><strong>Security Best Practices:</strong> JWT, BCrypt password encoding, role-based authorization</li>
+                <li><strong>Clean Code:</strong> Lombok untuk mengurangi boilerplate, proper naming conventions</li>
+                <li><strong>Logging:</strong> SLF4J untuk proper logging</li>
+            </ul>
+
+            <h3>Areas for Enhancement</h3>
+            <ul>
+                <li>Input validation dengan Bean Validation (@Valid, @NotNull, etc.)</li>
+                <li>Global exception handler dengan @ControllerAdvice</li>
+                <li>API documentation dengan Swagger/OpenAPI</li>
+                <li>Unit dan integration tests</li>
+                <li>Caching implementation dengan Redis</li>
+                <li>Database migration dengan Flyway/Liquibase</li>
+                <li>Health checks dan metrics dengan Actuator</li>
+            </ul>
+        </section>
+
+        <footer class="card" style="text-align: center; margin-top: 50px;">
+            <h3>📖 Dokumentasi Generated</h3>
+            <p>Dokumentasi ini di-generate secara otomatis dari source code BE-DMS</p>
+            <p><strong>Last Updated:</strong> 14 Agustus 2025</p>
+            <p><strong>Version:</strong> 0.0.1-SNAPSHOT</p>
+            <p><strong>Tech Stack:</strong> Spring Boot 3.5.4, Java 21, MySQL, JWT</p>
+        </footer>
+    </div>
+</body>
+</html>
