@@ -1,8 +1,8 @@
 package com.bank_dki.be_dms.controller;
 
 import com.bank_dki.be_dms.dto.MessageResponse;
+import com.bank_dki.be_dms.dto.RoleDTO;
 import com.bank_dki.be_dms.entity.Role;
-import com.bank_dki.be_dms.entity.User;
 import com.bank_dki.be_dms.service.RoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +10,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/api/admin/roles")
@@ -26,9 +25,15 @@ public class RoleController {
         return ResponseEntity.ok(roleService.getAllRoles());
     }
     
+    @GetMapping("/active")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
+    public ResponseEntity<List<Role>> getAllActiveRoles() {
+        return ResponseEntity.ok(roleService.getAllActiveRoles());
+    }
+    
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Role> getRoleById(@PathVariable Long id) {
+    public ResponseEntity<Role> getRoleById(@PathVariable Short id) {
         return roleService.getRoleById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -36,12 +41,22 @@ public class RoleController {
     
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<MessageResponse> createRole(
-            @RequestParam String name,
-            @RequestParam(required = false) String description) {
+    public ResponseEntity<MessageResponse> createRole(@RequestBody RoleDTO roleDTO) {
         try {
-            roleService.createRole(name, description);
+            roleService.createRole(roleDTO);
             return ResponseEntity.ok(new MessageResponse("Role created successfully!"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse("Error: " + e.getMessage()));
+        }
+    }
+    
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<MessageResponse> updateRole(@PathVariable Short id, @RequestBody RoleDTO roleDTO) {
+        try {
+            roleService.updateRole(id, roleDTO);
+            return ResponseEntity.ok(new MessageResponse("Role updated successfully!"));
         } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body(new MessageResponse("Error: " + e.getMessage()));
@@ -50,7 +65,7 @@ public class RoleController {
     
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<MessageResponse> deleteRole(@PathVariable Long id) {
+    public ResponseEntity<MessageResponse> deleteRole(@PathVariable Short id) {
         try {
             roleService.deleteRole(id);
             return ResponseEntity.ok(new MessageResponse("Role deleted successfully!"));
@@ -63,8 +78,8 @@ public class RoleController {
     @PostMapping("/assign")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> assignRoleToUser(
-            @RequestParam Long userId,
-            @RequestParam Long roleId) {
+            @RequestParam Short userId,
+            @RequestParam Short roleId) {
         try {
             roleService.assignRoleToUser(userId, roleId);
             return ResponseEntity.ok(new MessageResponse("Role assigned successfully!"));
@@ -74,25 +89,16 @@ public class RoleController {
         }
     }
     
-    @PostMapping("/remove")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<MessageResponse> removeRoleFromUser(
-            @RequestParam Long userId,
-            @RequestParam Long roleId) {
-        try {
-            roleService.removeRoleFromUser(userId, roleId);
-            return ResponseEntity.ok(new MessageResponse("Role removed successfully!"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponse("Error: " + e.getMessage()));
-        }
-    }
-    
     @GetMapping("/user/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Set<Role>> getUserRoles(@PathVariable Long userId) {
+    public ResponseEntity<Role> getUserRole(@PathVariable Short userId) {
         try {
-            return ResponseEntity.ok(roleService.getUserRoles(userId));
+            Role role = roleService.getUserRole(userId);
+            if (role != null) {
+                return ResponseEntity.ok(role);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }

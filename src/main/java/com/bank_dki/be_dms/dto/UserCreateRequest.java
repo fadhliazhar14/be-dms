@@ -3,7 +3,7 @@ package com.bank_dki.be_dms.dto;
 import lombok.Data;
 
 @Data
-public class SignupRequest {
+public class UserCreateRequest {
     private String userName;
     private String userEmail;
     private String userHashPassword;
@@ -11,4 +11,5 @@ public class SignupRequest {
     private String userTglLahir;
     private String userJabatan;
     private String userTempatLahir;
+    private Boolean userIsActive = true;
 }

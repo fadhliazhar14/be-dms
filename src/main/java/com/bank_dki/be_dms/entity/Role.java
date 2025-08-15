@@ -7,12 +7,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.HashSet;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
-@Table(name = "roles")
+@Table(name = "role")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,29 +20,53 @@ import java.util.Set;
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "RoleId")
+    private Short roleId;
     
-    @Column(unique = true, nullable = false)
-    private String name;
+    @Column(name = "RoleCreateDate", nullable = true)
+    private LocalDateTime roleCreateDate;
     
-    @Column(length = 500)
-    private String description;
+    @Column(name = "RoleUpdateDate", nullable = true)
+    private LocalDateTime roleUpdateDate;
     
-    @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
+    @Column(name = "RoleIsActive", nullable = true)
+    private Boolean roleIsActive;
+    
+    @Column(name = "RoleName", length = 50, nullable = true)
+    private String roleName;
+    
+    @Column(name = "RoleCreateBy", length = 50, nullable = true)
+    private String roleCreateBy;
+    
+    @Column(name = "RoleUpdateBy", length = 50, nullable = true)
+    private String roleUpdateBy;
+    
+    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
     @JsonIgnore
-    private Set<User> users = new HashSet<>();
+    private List<User> users;
+    
+    @PrePersist
+    protected void onCreate() {
+        roleCreateDate = LocalDateTime.now();
+        roleUpdateDate = LocalDateTime.now();
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        roleUpdateDate = LocalDateTime.now();
+    }
     
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Role role = (Role) o;
-        return Objects.equals(id, role.id) && 
-               Objects.equals(name, role.name);
+        return Objects.equals(roleId, role.roleId) && 
+               Objects.equals(roleName, role.roleName);
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(id, name);
+        return Objects.hash(roleId, roleName);
     }
 }

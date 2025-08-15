@@ -1,6 +1,6 @@
-# BE DMS - Backend Document Management System
+# 🏦 Bank DKI Document Management System (DMS) API
 
-Backend aplikasi Document Management System dengan fitur authentication berbasis JWT dan role-based access control.
+REST API untuk sistem manajemen dokumen Bank DKI yang menyediakan fitur authentication, user management, customer management, dan sistem administrasi lengkap berdasarkan struktur database DDL yang telah disesuaikan.
 
 ## 📋 Table of Contents
 - [Prerequisites](#prerequisites)
@@ -64,37 +64,42 @@ jwt.expiration=86400000
 
 ## 📊 Database Schema
 
-### Users Table
+### Core Tables (Updated Schema)
+
+#### User Table
 ```sql
-CREATE TABLE users (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(255) UNIQUE NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    enabled BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP
+CREATE TABLE user (
+    UserId SMALLINT AUTO_INCREMENT PRIMARY KEY,
+    UserName VARCHAR(100),
+    UserEmail VARCHAR(100),
+    UserHashPassword VARCHAR(100),
+    UserIsActive BOOLEAN,
+    RoleId SMALLINT NOT NULL,
+    UserCreateAt DATETIME,
+    UserUpdateAt DATETIME,
+    UserCreateBy VARCHAR(50),
+    UserUpdateBy VARCHAR(50),
+    UserTglLahir VARCHAR(100),
+    UserJabatan VARCHAR(40),
+    UserTempatLahir VARCHAR(100),
+    FOREIGN KEY (RoleId) REFERENCES role(RoleId)
 );
 ```
 
-### Roles Table
+#### Role Table
 ```sql
-CREATE TABLE roles (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) UNIQUE NOT NULL,
-    description VARCHAR(500)
+CREATE TABLE role (
+    RoleId SMALLINT AUTO_INCREMENT PRIMARY KEY,
+    RoleName VARCHAR(50),
+    RoleIsActive BOOLEAN,
+    RoleCreateDate DATETIME,
+    RoleUpdateDate DATETIME,
+    RoleCreateBy VARCHAR(50),
+    RoleUpdateBy VARCHAR(50)
 );
 ```
 
-### User_Roles Junction Table
-```sql
-CREATE TABLE user_roles (
-    user_id BIGINT,
-    role_id BIGINT,
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (role_id) REFERENCES roles(id)
-);
-```
+**Important**: Setiap user hanya memiliki **1 role** (many-to-one relationship), bukan many-to-many.
 
 ## 🏗️ Architecture
 
@@ -172,7 +177,7 @@ http://localhost:8080/api
     "type": "Bearer",
     "username": "admin",
     "email": "admin@example.com",
-    "roles": ["ADMIN"]
+    "role": "ADMIN"
 }
 ```
 

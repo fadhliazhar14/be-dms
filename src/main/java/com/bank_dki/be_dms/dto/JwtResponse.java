@@ -3,8 +3,6 @@ package com.bank_dki.be_dms.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 public class JwtResponse {
@@ -12,12 +10,12 @@ public class JwtResponse {
     private String type = "Bearer";
     private String username;
     private String email;
-    private List<String> roles;
+    private String role;
     
-    public JwtResponse(String token, String username, String email, List<String> roles) {
+    public JwtResponse(String token, String username, String email, String role) {
         this.token = token;
         this.username = username;
         this.email = email;
-        this.roles = roles;
+        this.role = role;
     }
 }

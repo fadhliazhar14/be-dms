@@ -22,24 +22,26 @@ public class DataInitializer implements CommandLineRunner {
         Role adminRole;
         Role operatorRole;
         
-        if (!roleRepository.existsByName("ADMIN")) {
+        if (!roleRepository.existsByRoleName("ADMIN")) {
             adminRole = new Role();
-            adminRole.setName("ADMIN");
-            adminRole.setDescription("Administrator role with full access");
+            adminRole.setRoleName("ADMIN");
+            adminRole.setRoleIsActive(true);
+            adminRole.setRoleCreateBy("SYSTEM");
             adminRole = roleRepository.save(adminRole);
             log.info("Created ADMIN role");
         } else {
-            adminRole = roleRepository.findByName("ADMIN").orElse(null);
+            adminRole = roleRepository.findByRoleName("ADMIN").orElse(null);
         }
         
-        if (!roleRepository.existsByName("OPERATOR")) {
+        if (!roleRepository.existsByRoleName("OPERATOR")) {
             operatorRole = new Role();
-            operatorRole.setName("OPERATOR");
-            operatorRole.setDescription("Operator role with limited access");
+            operatorRole.setRoleName("OPERATOR");
+            operatorRole.setRoleIsActive(true);
+            operatorRole.setRoleCreateBy("SYSTEM");
             operatorRole = roleRepository.save(operatorRole);
             log.info("Created OPERATOR role");
         } else {
-            operatorRole = roleRepository.findByName("OPERATOR").orElse(null);
+            operatorRole = roleRepository.findByRoleName("OPERATOR").orElse(null);
         }
         
         // Simple initialization - don't try to auto-assign roles

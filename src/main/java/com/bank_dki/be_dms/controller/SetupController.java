@@ -21,21 +21,20 @@ public class SetupController {
     @PostMapping("/make-admin")
     public ResponseEntity<MessageResponse> makeUserAdmin(@RequestParam String email) {
         try {
-            User user = userRepository.findByUsernameOrEmailWithRoles(email)
+            User user = userRepository.findByUserNameOrEmailWithRole(email)
                     .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
             
-            Role adminRole = roleRepository.findByName("ADMIN")
+            Role adminRole = roleRepository.findByRoleName("ADMIN")
                     .orElseThrow(() -> new RuntimeException("ADMIN role not found"));
             
             // Check if user already has admin role
-            boolean hasAdminRole = user.getRoles().stream()
-                    .anyMatch(role -> "ADMIN".equals(role.getName()));
+            boolean hasAdminRole = user.getRole() != null && "ADMIN".equals(user.getRole().getRoleName());
             
             if (hasAdminRole) {
                 return ResponseEntity.ok(new MessageResponse("User already has ADMIN role"));
             }
             
-            user.getRoles().add(adminRole);
+            user.setRoleId(adminRole.getRoleId());
             userRepository.save(user);
             
             return ResponseEntity.ok(new MessageResponse("ADMIN role assigned to user: " + email));
@@ -48,7 +47,7 @@ public class SetupController {
     @GetMapping("/users")
     public ResponseEntity<?> getAllUsersWithRoles() {
         try {
-            return ResponseEntity.ok(userRepository.findAllWithRoles());
+            return ResponseEntity.ok(userRepository.findAllWithRole());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: " + e.getMessage()));
         }

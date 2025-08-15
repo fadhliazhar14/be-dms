@@ -10,7 +10,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -22,26 +23,23 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
         
-        User user = userRepository.findByUsernameOrEmailWithRoles(usernameOrEmail)
+        User user = userRepository.findByUserNameOrEmailWithRole(usernameOrEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + usernameOrEmail));
         
-        
-        // Create a defensive copy of roles to avoid ConcurrentModificationException
-        var roleAuthorities = user.getRoles().stream()
-                .map(role -> {
-                    return new SimpleGrantedAuthority("ROLE_" + role.getName());
-                })
-                .collect(Collectors.toList());
-        
+        // Create authorities based on user role
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        if (user.getRole() != null) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().getRoleName()));
+        }
         
         return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getUsername())
-                .password(user.getPassword())
-                .authorities(roleAuthorities)
+                .username(user.getUserName())
+                .password(user.getUserHashPassword())
+                .authorities(authorities)
                 .accountExpired(false)
                 .accountLocked(false)
                 .credentialsExpired(false)
-                .disabled(!user.getEnabled())
+                .disabled(!user.getUserIsActive())
                 .build();
     }
 }

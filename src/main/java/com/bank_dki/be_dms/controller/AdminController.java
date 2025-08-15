@@ -21,13 +21,13 @@ public class AdminController {
     @PostMapping("/assign-admin-role")
     public ResponseEntity<MessageResponse> assignAdminRole(@RequestParam String email) {
         try {
-            User user = userRepository.findByEmail(email)
+            User user = userRepository.findByUserEmail(email)
                     .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
             
-            Role adminRole = roleRepository.findByName("ADMIN")
+            Role adminRole = roleRepository.findByRoleName("ADMIN")
                     .orElseThrow(() -> new RuntimeException("ADMIN role not found"));
             
-            user.getRoles().add(adminRole);
+            user.setRoleId(adminRole.getRoleId());
             userRepository.save(user);
             
             return ResponseEntity.ok(new MessageResponse("ADMIN role assigned to user: " + email));
@@ -37,8 +37,8 @@ public class AdminController {
         }
     }
     
-    @GetMapping("/users")
-    public ResponseEntity<?> getAllUsers() {
-        return ResponseEntity.ok(userRepository.findAll());
+    @GetMapping("/all-users")
+    public ResponseEntity<?> getAllUsersForAdmin() {
+        return ResponseEntity.ok(userRepository.findAllWithRole());
     }
 }

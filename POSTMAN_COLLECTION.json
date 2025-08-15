@@ -1,0 +1,616 @@
+{
+  "info": {
+    "_postman_id": "abc12345-def6-789g-hij1-klmnopqrstuv",
+    "name": "Bank DKI DMS API",
+    "description": "Collection untuk Bank DKI Document Management System API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    }
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userEmail\": \"admin@bankdki.com\",\n  \"userHashPassword\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/signin",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "signin"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('jwt_token', jsonData.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"john_doe\",\n  \"userEmail\": \"john@bankdki.com\",\n  \"userHashPassword\": \"password123\",\n  \"roleId\": 2,\n  \"userTglLahir\": \"1990-01-15\",\n  \"userJabatan\": \"Customer Service\",\n  \"userTempatLahir\": \"Jakarta\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/signup",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "signup"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User Management",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "users"]
+            }
+          }
+        },
+        {
+          "name": "Get Active Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/active",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "users", "active"]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "users", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"jane_doe\",\n  \"userEmail\": \"jane@bankdki.com\",\n  \"userHashPassword\": \"password123\",\n  \"roleId\": 2,\n  \"userTglLahir\": \"1992-05-20\",\n  \"userJabatan\": \"Teller\",\n  \"userTempatLahir\": \"Bandung\",\n  \"userIsActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/users",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "users"]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"jane_smith\",\n  \"userEmail\": \"jane.smith@bankdki.com\",\n  \"roleId\": 1,\n  \"userTglLahir\": \"1992-05-20\",\n  \"userJabatan\": \"Supervisor\",\n  \"userTempatLahir\": \"Bandung\",\n  \"userIsActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/2",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "users", "2"]
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/2",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "users", "2"]
+            }
+          }
+        },
+        {
+          "name": "Activate User",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/2/activate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "users", "2", "activate"]
+            }
+          }
+        },
+        {
+          "name": "Deactivate User",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/2/deactivate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "users", "2", "deactivate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Role Management",
+      "item": [
+        {
+          "name": "Get All Roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/admin/roles",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "roles"]
+            }
+          }
+        },
+        {
+          "name": "Get Active Roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/admin/roles/active",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "roles", "active"]
+            }
+          }
+        },
+        {
+          "name": "Create Role",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roleName\": \"MANAGER\",\n  \"roleIsActive\": true,\n  \"roleCreateBy\": \"admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/roles",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "roles"]
+            }
+          }
+        },
+        {
+          "name": "Assign Role to User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/admin/roles/assign?userId=2&roleId=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "roles", "assign"],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "2"
+                },
+                {
+                  "key": "roleId",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Customer Management",
+      "item": [
+        {
+          "name": "Get All Customers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/customers",
+              "host": ["{{base_url}}"],
+              "path": ["api", "customers"]
+            }
+          }
+        },
+        {
+          "name": "Get Customer by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/customers/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "customers", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get Customer by CIF",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/customers/cif/CIF001",
+              "host": ["{{base_url}}"],
+              "path": ["api", "customers", "cif", "CIF001"]
+            }
+          }
+        },
+        {
+          "name": "Get Customer by NIK",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/customers/nik/3171234567890123",
+              "host": ["{{base_url}}"],
+              "path": ["api", "customers", "nik", "3171234567890123"]
+            }
+          }
+        },
+        {
+          "name": "Create Customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"custCifNumber\": \"CIF002\",\n  \"custStatus\": \"ACTIVE\",\n  \"custCabang\": \"Jakarta Selatan\",\n  \"custGolNasabah\": \"RETAIL\",\n  \"prsnNama\": \"Siti Nurhaliza\",\n  \"prsnJenisKelamin\": \"P\",\n  \"prsnTanggalLahir\": \"1985-03-15\",\n  \"prsnTempatLahir\": \"Jakarta\",\n  \"cardNik\": \"3172345678901234\",\n  \"cardNpwp\": \"123456789012345\",\n  \"adrsNomorHp\": \"081987654321\",\n  \"adrsSurel\": \"siti@email.com\",\n  \"adrsProvinsi\": \"DKI Jakarta\",\n  \"adrsKota\": \"Jakarta Selatan\",\n  \"adrsAlamat1\": \"Jl. Sudirman No. 123\",\n  \"workInstansi\": \"PT ABC\",\n  \"workStatusPekerjaan\": \"Karyawan Swasta\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/customers",
+              "host": ["{{base_url}}"],
+              "path": ["api", "customers"]
+            }
+          }
+        },
+        {
+          "name": "Update Customer",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"custCifNumber\": \"CIF002\",\n  \"custStatus\": \"ACTIVE\",\n  \"prsnNama\": \"Siti Nurhaliza Updated\",\n  \"adrsNomorHp\": \"081999888777\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/customers/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "customers", "1"]
+            }
+          }
+        },
+        {
+          "name": "Search Customer by Name",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/customers/search?nama=Siti",
+              "host": ["{{base_url}}"],
+              "path": ["api", "customers", "search"],
+              "query": [
+                {
+                  "key": "nama",
+                  "value": "Siti"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Customers by Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/customers/status/ACTIVE",
+              "host": ["{{base_url}}"],
+              "path": ["api", "customers", "status", "ACTIVE"]
+            }
+          }
+        },
+        {
+          "name": "Get Customers by Cabang",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/customers/cabang/Jakarta Pusat",
+              "host": ["{{base_url}}"],
+              "path": ["api", "customers", "cabang", "Jakarta Pusat"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Schedule Management",
+      "item": [
+        {
+          "name": "Get Operators by Date Grouped by Tasks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/schedule/operators-by-date?date=2025-08-16",
+              "host": ["{{base_url}}"],
+              "path": ["api", "schedule", "operators-by-date"],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2025-08-16",
+                  "description": "Optional: Schedule date (YYYY-MM-DD). Default: today"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Operators to Schedule",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userIds\": [2, 3, 4],\n  \"taskId\": 1,\n  \"scheduleDate\": \"2025-08-16\",\n  \"createdBy\": \"admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/schedule/add-operators",
+              "host": ["{{base_url}}"],
+              "path": ["api", "schedule", "add-operators"]
+            }
+          }
+        },
+        {
+          "name": "Remove Operator from Schedule",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 2,\n  \"taskId\": 1,\n  \"scheduleDate\": \"2025-08-16\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/schedule/remove-operator",
+              "host": ["{{base_url}}"],
+              "path": ["api", "schedule", "remove-operator"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Customer Statistics",
+      "item": [
+        {
+          "name": "Get Customer Status Count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/customer-stats/status-count",
+              "host": ["{{base_url}}"],
+              "path": ["api", "customer-stats", "status-count"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Setup & Admin",
+      "item": [
+        {
+          "name": "Make User Admin",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/setup/make-admin?email=admin@bankdki.com",
+              "host": ["{{base_url}}"],
+              "path": ["api", "setup", "make-admin"],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "admin@bankdki.com"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Users with Roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/setup/users",
+              "host": ["{{base_url}}"],
+              "path": ["api", "setup", "users"]
+            }
+          }
+        },
+        {
+          "name": "Assign Admin Role",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/admin/assign-admin-role?email=user@bankdki.com",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "assign-admin-role"],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "user@bankdki.com"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
