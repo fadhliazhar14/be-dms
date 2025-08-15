@@ -28,4 +28,9 @@ public interface UserRepository extends JpaRepository<User, Short> {
     
     @Query("SELECT u FROM User u WHERE u.roleId = :roleId")
     List<User> findByRoleId(@Param("roleId") Short roleId);
+
+    @Query("SELECT u FROM User u " +
+            "WHERE u.roleId = :roleId " +
+            "AND (:search IS NULL OR :search = '' OR LOWER(u.userName) LIKE LOWER(CONCAT('%', :search, '%')))")
+    List<User> findByRoleIdAndSearch(@Param("roleId") Short roleId, @Param("search") String search);
 }

@@ -5,6 +5,7 @@ import com.bank_dki.be_dms.dto.UserCreateRequest;
 import com.bank_dki.be_dms.dto.UserDTO;
 import com.bank_dki.be_dms.dto.UserUpdateRequest;
 import com.bank_dki.be_dms.service.UserService;
+import com.bank_dki.be_dms.util.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,10 +35,11 @@ public class UserController {
     
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable Short id) {
-        return userService.getUserById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ApiResponse<UserDTO>> getUserById(@PathVariable Short id) {
+        UserDTO user = userService.getUserById(id);
+        ApiResponse<UserDTO> response = ApiResponse.success("Succes", user);
+
+        return ResponseEntity.ok(response);
     }
     
     @GetMapping("/email/{email}")
@@ -110,7 +112,10 @@ public class UserController {
     
     @GetMapping("/role/{roleId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserDTO>> getUsersByRole(@PathVariable Short roleId) {
-        return ResponseEntity.ok(userService.getUsersByRole(roleId));
+    public ResponseEntity<ApiResponse<List<UserDTO>>> getUsersByRole(@PathVariable Short roleId, @RequestParam String search) {
+        List<UserDTO> users = userService.getUsersByRoleAndSearch(roleId, search);
+        ApiResponse<List<UserDTO>> response = ApiResponse.success("Success", users);
+
+        return ResponseEntity.ok(response);
     }
 }

@@ -4,6 +4,7 @@ import com.bank_dki.be_dms.dto.UserCreateRequest;
 import com.bank_dki.be_dms.dto.UserDTO;
 import com.bank_dki.be_dms.dto.UserUpdateRequest;
 import com.bank_dki.be_dms.entity.User;
+import com.bank_dki.be_dms.exception.ResourceNotFoundException;
 import com.bank_dki.be_dms.repository.RoleRepository;
 import com.bank_dki.be_dms.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,9 +35,10 @@ public class UserService {
                 .collect(Collectors.toList());
     }
     
-    public Optional<UserDTO> getUserById(Short id) {
-        return userRepository.findById(id)
-                .map(this::convertToDTO);
+    public UserDTO getUserById(Short id) {
+        UserDTO user = convertToDTO(userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User with ID " + id + " not found")));
+        return user;
     }
     
     public Optional<UserDTO> getUserByEmail(String email) {
@@ -124,6 +126,12 @@ public class UserService {
     
     public List<UserDTO> getUsersByRole(Short roleId) {
         return userRepository.findByRoleId(roleId).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<UserDTO> getUsersByRoleAndSearch(Short roleId, String search) {
+        return userRepository.findByRoleIdAndSearch(roleId, search).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
