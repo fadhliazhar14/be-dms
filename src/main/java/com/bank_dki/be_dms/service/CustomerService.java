@@ -1,9 +1,14 @@
 package com.bank_dki.be_dms.service;
 
+import com.bank_dki.be_dms.common.PageRequestDTO;
+import com.bank_dki.be_dms.common.PageResponseDTO;
 import com.bank_dki.be_dms.dto.CustomerDTO;
 import com.bank_dki.be_dms.entity.Customer;
 import com.bank_dki.be_dms.repository.CustomerRepository;
+import com.bank_dki.be_dms.util.PageUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,11 +26,27 @@ public class CustomerService {
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
-    
+
     public List<CustomerDTO> getAllActiveCustomers() {
         return customerRepository.findAllActiveCustomers().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+    }
+    
+    public PageResponseDTO<CustomerDTO> getAllActiveCustomers(PageRequestDTO pageRequest) {
+        Pageable pageable = PageUtil.createPageable(pageRequest);
+
+        Page<Customer> customerPage = customerRepository.findAllWithSearchAndDateRange(pageRequest.getSearch(), pageRequest.getDateFrom(), pageRequest.getDateTo(), pageable);
+
+        List<CustomerDTO> customerResponses = customerPage.getContent().stream()
+                .map(this::convertToDTO)
+                .toList();
+
+        return PageUtil.createPageResponse(
+                customerResponses,
+                pageable,
+                customerPage.getTotalElements()
+        );
     }
     
     public Optional<CustomerDTO> getCustomerById(Short id) {

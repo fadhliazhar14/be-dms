@@ -1,13 +1,18 @@
 package com.bank_dki.be_dms.controller;
 
+import com.bank_dki.be_dms.common.PageRequestDTO;
+import com.bank_dki.be_dms.common.PageResponseDTO;
 import com.bank_dki.be_dms.dto.CustomerDTO;
 import com.bank_dki.be_dms.dto.MessageResponse;
 import com.bank_dki.be_dms.service.CustomerService;
+import com.bank_dki.be_dms.util.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -20,8 +25,28 @@ public class CustomerController {
     
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
-    public ResponseEntity<List<CustomerDTO>> getAllCustomers() {
-        return ResponseEntity.ok(customerService.getAllActiveCustomers());
+    public ResponseEntity<ApiResponse<PageResponseDTO<CustomerDTO>>> getAllCustomers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "id") String sort,
+            @RequestParam(defaultValue = "desc") String direction,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo) {
+
+        PageRequestDTO pageRequest = new PageRequestDTO();
+        pageRequest.setPage(page);
+        pageRequest.setSize(size);
+        pageRequest.setSort(sort);
+        pageRequest.setDirection(direction);
+        pageRequest.setSearch(search);
+        pageRequest.setDateFrom(dateFrom);
+        pageRequest.setDateTo(dateTo);
+
+        PageResponseDTO<CustomerDTO> customers = customerService.getAllActiveCustomers(pageRequest);
+        ApiResponse<PageResponseDTO<CustomerDTO>> response = ApiResponse.success("Success", customers);
+
+        return ResponseEntity.ok(response);
     }
     
     @GetMapping("/all")
