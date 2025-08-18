@@ -41,7 +41,9 @@ public interface CustomerRepository extends JpaRepository<Customer, Short> {
     SELECT c 
     FROM Customer c 
     WHERE 
-        (:search IS NULL OR :search = '' OR LOWER(c.prsnNama) LIKE LOWER(CONCAT('%', :search, '%')))
+        (:search IS NULL OR :search = '' OR 
+        LOWER(c.prsnNama) LIKE LOWER(CONCAT('%', :search, '%')) OR
+        c.custNoRek LIKE CONCAT('%', :search, '%'))
         AND (:dateFrom IS NULL OR c.custDeliverDate >= :dateFrom)
         AND (:dateTo IS NULL OR c.custDeliverDate <= :dateTo)
 """)
