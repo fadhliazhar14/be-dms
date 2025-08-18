@@ -8,6 +8,7 @@ import com.bank_dki.be_dms.service.CustomerService;
 import com.bank_dki.be_dms.util.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -134,7 +135,7 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.searchCustomersByName(nama));
     }
 
-    @PostMapping("/upload")
+    @PostMapping("/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<ApiResponse<Void>> uploadCsv(@RequestParam("file") MultipartFile file) {
         customerService.saveCustomersFromCsv(file);
