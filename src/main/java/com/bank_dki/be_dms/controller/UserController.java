@@ -112,7 +112,7 @@ public class UserController {
     
     @GetMapping("/role/{roleId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<List<UserDTO>>> getUsersByRole(@PathVariable Short roleId, @RequestParam String search) {
+    public ResponseEntity<ApiResponse<List<UserDTO>>> getUsersByRole(@PathVariable Short roleId, @RequestParam(required = false) String search) {
         List<UserDTO> users = userService.getUsersByRoleAndSearch(roleId, search);
         ApiResponse<List<UserDTO>> response = ApiResponse.success("Success", users);
 
