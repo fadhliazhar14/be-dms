@@ -11,6 +11,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -131,5 +132,14 @@ public class CustomerController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<List<CustomerDTO>> searchCustomersByName(@RequestParam String nama) {
         return ResponseEntity.ok(customerService.searchCustomersByName(nama));
+    }
+
+    @PostMapping("/upload")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
+    public ResponseEntity<ApiResponse<Void>> uploadCsv(@RequestParam("file") MultipartFile file) {
+        customerService.saveCustomersFromCsv(file);
+        ApiResponse<Void> response = ApiResponse.success("CSV has been uploaded successfully", null);
+
+        return ResponseEntity.ok(response);
     }
 }

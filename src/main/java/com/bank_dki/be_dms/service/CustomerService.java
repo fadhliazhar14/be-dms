@@ -6,12 +6,14 @@ import com.bank_dki.be_dms.dto.CustomerDTO;
 import com.bank_dki.be_dms.entity.Customer;
 import com.bank_dki.be_dms.exception.BusinessValidationException;
 import com.bank_dki.be_dms.repository.CustomerRepository;
+import com.bank_dki.be_dms.util.ApiResponse;
 import com.bank_dki.be_dms.util.PageUtil;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -93,6 +95,10 @@ public class CustomerService {
     @Transactional
     public void saveCustomersFromCsv(MultipartFile file) {
         try (Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+            if (file.isEmpty()) {
+                throw new BusinessValidationException("File is empty");
+            }
+
             Iterable<CSVRecord> records = CSVFormat.DEFAULT
                     .withFirstRecordAsHeader()
                     .parse(reader);
