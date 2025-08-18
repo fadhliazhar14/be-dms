@@ -135,7 +135,7 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.searchCustomersByName(nama));
     }
 
-    @PostMapping("/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping("/upload")
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<ApiResponse<Void>> uploadCsv(@RequestParam("file") MultipartFile file) {
         customerService.saveCustomersFromCsv(file);
