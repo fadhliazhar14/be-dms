@@ -4,16 +4,29 @@ import com.bank_dki.be_dms.common.PageRequestDTO;
 import com.bank_dki.be_dms.common.PageResponseDTO;
 import com.bank_dki.be_dms.dto.CustomerDTO;
 import com.bank_dki.be_dms.entity.Customer;
+import com.bank_dki.be_dms.exception.BusinessValidationException;
 import com.bank_dki.be_dms.repository.CustomerRepository;
 import com.bank_dki.be_dms.util.PageUtil;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.apache.commons.*;
 
 @Service
 @RequiredArgsConstructor
@@ -75,6 +88,111 @@ public class CustomerService {
         
         Customer customer = convertToEntity(customerDTO);
         return customerRepository.save(customer);
+    }
+
+    @Transactional
+    public void saveCustomersFromCsv(MultipartFile file) {
+        try (Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+            Iterable<CSVRecord> records = CSVFormat.DEFAULT
+                    .withFirstRecordAsHeader()
+                    .parse(reader);
+
+            List<Customer> customers = new ArrayList<>();
+            for (CSVRecord record : records) {
+                Customer customer = new Customer();
+                customer.setCustCifNumber(record.get("custCifNumber"));
+                customer.setCustStatus(record.get("custStatus"));
+                customer.setCustCabang(record.get("custCabang"));
+                customer.setCustGolNasabah(record.get("custGolNasabah"));
+                customer.setCustRisiko(record.get("custRisiko"));
+                customer.setCustGolPajak(record.get("custGolPajak"));
+                customer.setCustNoRek(record.get("custNoRek"));
+                customer.setCustTglBuka(record.get("custTglBuka"));
+                customer.setCustHubBank(record.get("custHubBank"));
+                customer.setCustSeqNumber(record.get("custSeqNumber"));
+                customer.setCustCreateBy(record.get("custCreateBy"));
+                customer.setCustUpdateBy(record.get("custUpdateBy"));
+
+                // Personal Information
+                customer.setPrsnNama(record.get("prsnNama"));
+                customer.setPrsnJenisKelamin(record.get("prsnJenisKelamin"));
+                customer.setPrsnPendidikan(record.get("prsnPendidikan"));
+                customer.setPrsnTempatLahir(record.get("prsnTempatLahir"));
+                customer.setPrsnAgama(record.get("prsnAgama"));
+                customer.setPrsnStatusPernikahan(record.get("prsnStatusPernikahan"));
+                customer.setPrsnTanggalLahir(record.get("prsnTanggalLahir"));
+                customer.setPrsnWargaNegara(record.get("prsnWargaNegara"));
+                customer.setPrsnIbuKandung(record.get("prsnIbuKandung"));
+
+                // Card Information
+                customer.setCardNik(record.get("cardNik"));
+                customer.setCardMasaBerlaku(record.get("cardMasaBerlaku"));
+                customer.setCardNpwp(record.get("cardNpwp"));
+
+                // Address Information
+                customer.setAdrsStatusRumah(record.get("adrsStatusRumah"));
+                customer.setAdrsNomorHp(record.get("adrsNomorHp"));
+                customer.setAdrsTelpRumah(record.get("adrsTelpRumah"));
+                customer.setAdrsTipeAlamat(record.get("adrsTipeAlamat"));
+                customer.setAdrsSurel(record.get("adrsSurel"));
+                customer.setAdrsProvinsi(record.get("adrsProvinsi"));
+                customer.setAdrsKota(record.get("adrsKota"));
+                customer.setAdrsKecamatan(record.get("adrsKecamatan"));
+                customer.setAdrsKelurahan(record.get("adrsKelurahan"));
+                customer.setAdrsRw(record.get("adrsRw"));
+                customer.setAdrsRt(record.get("adrsRt"));
+                customer.setAdrsKodePos(record.get("adrsKodePos"));
+                customer.setAdrsAlamat1(record.get("adrsAlamat1"));
+                customer.setAdrsAlamat2(record.get("adrsAlamat2"));
+
+                // Work Information
+                customer.setWorkBidangUsaha(record.get("workBidangUsaha"));
+                customer.setWorkInstansi(record.get("workInstansi"));
+                customer.setWorkKodePos(record.get("workKodePos"));
+                customer.setWorkKodeProf(record.get("workKodeProf"));
+                customer.setWorkAlamatInstansi(record.get("workAlamatInstansi"));
+                customer.setWorkNomorTelp(record.get("workNomorTelp"));
+                customer.setWorkStatusPekerjaan(record.get("workStatusPekerjaan"));
+
+                // Contact Information
+                customer.setCntkNamaKontak(record.get("cntkNamaKontak"));
+                customer.setCntkNomorTelp(record.get("cntkNomorTelp"));
+                customer.setCntkSuamiIstri(record.get("cntkSuamiIstri"));
+                customer.setCntkProvinsi(record.get("cntkProvinsi"));
+                customer.setCntkKota(record.get("cntkKota"));
+                customer.setCntkAlamat(record.get("cntkAlamat"));
+                customer.setCntkHubungan(record.get("cntkHubungan"));
+
+                // Finance Information
+                customer.setFnceSumberDana(record.get("fnceSumberDana"));
+                customer.setFnceTujuanPenggunaan(record.get("fnceTujuanPenggunaan"));
+                customer.setFncePengasilanPertahun(record.get("fncePengasilanPertahun"));
+                customer.setFnceTambahanPertahun(record.get("fnceTambahanPertahun"));
+                customer.setFnceJumlahSetor(record.get("fnceJumlahSetor"));
+                customer.setFnceJumlahTarik(record.get("fnceJumlahTarik"));
+                customer.setFnceMaxSetorPerbulan(record.get("fnceMaxSetorPerbulan"));
+                customer.setFnceMaxTarikPerbulan(record.get("fnceMaxTarikPerbulan"));
+
+                // Others Information
+                customer.setOtrsKodeDinas(record.get("otrsKodeDinas"));
+                customer.setOtrsDataCNCDBI(record.get("otrsDataCNCDBI"));
+                customer.setOtrsDataCNCDU6(record.get("otrsDataCNCDU6"));
+                customer.setOtrsDataCNBI10(record.get("otrsDataCNBI10"));
+                customer.setOtrsDataCARGCD(record.get("otrsDataCARGCD"));
+                customer.setOtrsDataCNEML1(record.get("otrsDataCNEML1"));
+                customer.setOtrsDataCNXH01(record.get("otrsDataCNXH01"));
+                customer.setOtrsDataCNXH03(record.get("otrsDataCNXH03"));
+                customer.setCustAging("0");
+                customer.setCustDeliverDate(LocalDate.now());
+                customer.setCustIsDeleted(false);
+
+                customers.add(customer);
+            }
+
+            customerRepository.saveAll(customers);
+        } catch (IOException e) {
+            throw new BusinessValidationException("Failed to parse CSV file");
+        }
     }
     
     public Customer updateCustomer(Short id, CustomerDTO customerDTO) {
