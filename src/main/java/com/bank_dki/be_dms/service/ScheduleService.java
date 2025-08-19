@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,32 +26,22 @@ public class ScheduleService {
     private final UserRepository userRepository;
     private final TaskRepository taskRepository;
     
-    public List<OperatorTaskGroupDto> getOperatorsByDateGroupByTasks(LocalDate date) {
+    public OperatorTaskGroupDto getOperatorsByDateGroupByTasks(LocalDate date) {
         List<Schedule> schedules = scheduleRepository.findByScheduleDateWithDetails(date);
-        
-        Map<Short, List<Schedule>> groupedByTask = schedules.stream()
-                .collect(Collectors.groupingBy(Schedule::getTaskId));
-        
-        return groupedByTask.entrySet().stream()
-                .map(entry -> {
-                    Short taskId = entry.getKey();
-                    List<Schedule> taskSchedules = entry.getValue();
-                    
-                    String taskName = taskSchedules.isEmpty() ? "" : 
-                            taskSchedules.get(0).getTask().getTaskName();
-                    
-                    List<OperatorTaskGroupDto.OperatorDto> operators = taskSchedules.stream()
-                            .map(schedule -> new OperatorTaskGroupDto.OperatorDto(
-                                    schedule.getUser().getUserId(),
-                                    schedule.getUser().getUserName(),
-                                    schedule.getUser().getUserEmail(),
-                                    schedule.getUser().getUserJabatan()
-                            ))
-                            .collect(Collectors.toList());
-                    
-                    return new OperatorTaskGroupDto(taskId, taskName, operators);
-                })
-                .collect(Collectors.toList());
+
+        // group by task name
+        Map<String, List<Schedule>> groupedByTask = schedules.stream()
+                .collect(Collectors.groupingBy(schedule -> schedule.getTask().getTaskName().toLowerCase()));
+
+        OperatorTaskGroupDto dto = new OperatorTaskGroupDto();
+
+        // mapping untuk setiap taskName
+        dto.setScanning(mapOperators(groupedByTask.get("scanning")));
+        dto.setPengkaitan(mapOperators(groupedByTask.get("pengkaitan")));
+        dto.setPengkinian(mapOperators(groupedByTask.get("pengkinian")));
+        dto.setRegister(mapOperators(groupedByTask.get("register")));
+
+        return dto;
     }
     
     @Transactional
@@ -111,5 +102,21 @@ public class ScheduleService {
         scheduleRepository.deleteAll(schedules);
         
         return new MessageResponse("Operator removed from schedule successfully!");
+    }
+
+    private List<OperatorTaskGroupDto.OperatorDto> mapOperators(List<Schedule> schedules) {
+        if (schedules == null) {
+            return List.of();
+        }
+
+        return schedules.stream()
+                .map(schedule -> new OperatorTaskGroupDto.OperatorDto(
+                        schedule.getUser().getUserId(),
+                        schedule.getUser().getUserName(),
+                        schedule.getUser().getUserEmail(),
+                        schedule.getUser().getRole().getRoleName(),
+                        schedule.getUser().getUserImage() == null ? "" : Base64.getEncoder().encodeToString(schedule.getUser().getUserImage())
+                ))
+                .collect(Collectors.toList());
     }
 }

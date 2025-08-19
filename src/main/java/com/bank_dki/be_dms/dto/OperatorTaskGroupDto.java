@@ -10,9 +10,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OperatorTaskGroupDto {
-    private Short taskId;
-    private String taskName;
-    private List<OperatorDto> operators;
+    private List<OperatorDto> scanning;
+    private List<OperatorDto> pengkaitan;
+    private List<OperatorDto> pengkinian;
+    private List<OperatorDto> register;
     
     @Data
     @NoArgsConstructor
@@ -21,6 +22,7 @@ public class OperatorTaskGroupDto {
         private Short userId;
         private String userName;
         private String userEmail;
-        private String userJabatan;
+        private String userRole;
+        private String userAvatar;
     }
 }

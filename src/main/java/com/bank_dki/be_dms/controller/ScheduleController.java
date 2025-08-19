@@ -5,6 +5,7 @@ import com.bank_dki.be_dms.dto.DeleteOperatorFromScheduleRequest;
 import com.bank_dki.be_dms.dto.MessageResponse;
 import com.bank_dki.be_dms.dto.OperatorTaskGroupDto;
 import com.bank_dki.be_dms.service.ScheduleService;
+import com.bank_dki.be_dms.util.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -24,16 +25,17 @@ public class ScheduleController {
     
     @GetMapping("/operators-by-date")
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
-    public ResponseEntity<List<OperatorTaskGroupDto>> getOperatorsByDateGroupByTasks(
+    public ResponseEntity<ApiResponse<OperatorTaskGroupDto>> getOperatorsByDateGroupByTasks(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         
         // Default to today if date is not provided
         if (date == null) {
             date = LocalDate.now();
         }
-        
-        List<OperatorTaskGroupDto> result = scheduleService.getOperatorsByDateGroupByTasks(date);
-        return ResponseEntity.ok(result);
+
+        OperatorTaskGroupDto taskGroup = scheduleService.getOperatorsByDateGroupByTasks(date);
+        ApiResponse<OperatorTaskGroupDto> response = ApiResponse.success("Success", taskGroup);
+        return ResponseEntity.ok(response);
     }
     
     @PostMapping("/add-operators")
