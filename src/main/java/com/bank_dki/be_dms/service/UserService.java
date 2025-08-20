@@ -1,5 +1,7 @@
 package com.bank_dki.be_dms.service;
 
+import com.bank_dki.be_dms.common.PageRequestDTO;
+import com.bank_dki.be_dms.common.PageResponseDTO;
 import com.bank_dki.be_dms.dto.UserCreateRequest;
 import com.bank_dki.be_dms.dto.UserDTO;
 import com.bank_dki.be_dms.dto.UserUpdateRequest;
@@ -7,7 +9,10 @@ import com.bank_dki.be_dms.entity.User;
 import com.bank_dki.be_dms.exception.ResourceNotFoundException;
 import com.bank_dki.be_dms.repository.RoleRepository;
 import com.bank_dki.be_dms.repository.UserRepository;
+import com.bank_dki.be_dms.util.PageUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -36,14 +41,28 @@ public class UserService {
     }
     
     public UserDTO getUserById(Short id) {
-        UserDTO user = convertToDTO(userRepository.findById(id)
+        return convertToDTO(userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User with ID " + id + " not found")));
-        return user;
     }
     
     public Optional<UserDTO> getUserByEmail(String email) {
         return userRepository.findByUserEmail(email)
                 .map(this::convertToDTO);
+    }
+
+    public PageResponseDTO<UserDTO> getAllOperators(PageRequestDTO pageRequest) {
+        Pageable pageable = PageUtil.createPageable(pageRequest);
+
+        Page<User> userPage = userRepository.findByRoleIdAndSearch((short) 2, pageRequest.getSearch(), pageable);
+        List<UserDTO> userResponse = userPage.getContent().stream()
+                .map(this::convertToDTO)
+                .toList();
+
+        return PageUtil.createPageResponse(
+                userResponse,
+                pageable,
+                userPage.getTotalElements()
+        );
     }
     
     public User createUser(UserCreateRequest request) {

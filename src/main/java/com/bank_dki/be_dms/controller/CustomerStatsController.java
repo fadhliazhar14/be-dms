@@ -20,8 +20,9 @@ public class CustomerStatsController {
     
     @GetMapping("/status-count")
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
-    public ResponseEntity<ApiResponse<CustomerStatusCountDto>> getCustomerStatusCountGroupByTasks() {
-        CustomerStatusCountDto custStatsCount = customerStatsService.getCustomerStatusCountGroupByTasks();
+    public ResponseEntity<ApiResponse<CustomerStatusCountDto>> getCustomerStatusCountGroupByTasks(@RequestParam String filter) {
+
+        CustomerStatusCountDto custStatsCount = customerStatsService.getCustomerStatusCountGroupByTasks(filter);
         ApiResponse<CustomerStatusCountDto> response = ApiResponse.success("Success", custStatsCount);
 
         return ResponseEntity.ok(response);

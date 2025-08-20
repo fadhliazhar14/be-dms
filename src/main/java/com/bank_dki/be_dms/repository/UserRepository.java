@@ -1,6 +1,8 @@
 package com.bank_dki.be_dms.repository;
 
 import com.bank_dki.be_dms.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -33,4 +35,9 @@ public interface UserRepository extends JpaRepository<User, Short> {
             "WHERE u.roleId = :roleId " +
             "AND (:search IS NULL OR :search = '' OR LOWER(u.userName) LIKE LOWER(CONCAT('%', :search, '%')))")
     List<User> findByRoleIdAndSearch(@Param("roleId") Short roleId, @Param("search") String search);
+
+    @Query("SELECT u FROM User u " +
+            "WHERE u.roleId = :roleId " +
+            "AND (:search IS NULL OR :search = '' OR LOWER(u.userName) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<User> findByRoleIdAndSearch(@Param("roleId") Short roleId, @Param("search") String search, Pageable pageable);
 }

@@ -1,5 +1,7 @@
 package com.bank_dki.be_dms.controller;
 
+import com.bank_dki.be_dms.common.PageRequestDTO;
+import com.bank_dki.be_dms.common.PageResponseDTO;
 import com.bank_dki.be_dms.dto.MessageResponse;
 import com.bank_dki.be_dms.dto.UserCreateRequest;
 import com.bank_dki.be_dms.dto.UserDTO;
@@ -115,6 +117,28 @@ public class UserController {
     public ResponseEntity<ApiResponse<List<UserDTO>>> getUsersByRole(@PathVariable Short roleId, @RequestParam(required = false) String search) {
         List<UserDTO> users = userService.getUsersByRoleAndSearch(roleId, search);
         ApiResponse<List<UserDTO>> response = ApiResponse.success("Success", users);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/operators")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
+    public ResponseEntity<ApiResponse<PageResponseDTO<UserDTO>>> getOperators(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "id") String sort,
+            @RequestParam(defaultValue = "desc") String direction,
+            @RequestParam(required = false) String search
+    ) {
+        PageRequestDTO pageRequest = new PageRequestDTO();
+        pageRequest.setPage(page);
+        pageRequest.setSize(size);
+        pageRequest.setSort(sort);
+        pageRequest.setDirection(direction);
+        pageRequest.setSearch(search);
+
+        PageResponseDTO<UserDTO> operators = userService.getAllOperators(pageRequest);
+        ApiResponse<PageResponseDTO<UserDTO>> response = ApiResponse.success("Success", operators);
 
         return ResponseEntity.ok(response);
     }

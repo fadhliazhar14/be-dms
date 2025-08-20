@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,6 +37,15 @@ public interface CustomerRepository extends JpaRepository<Customer, Short> {
     
     @Query("SELECT c.custStatus, COUNT(c) FROM Customer c WHERE c.custIsDeleted = false OR c.custIsDeleted IS NULL GROUP BY c.custStatus")
     List<Object[]> countCustomersByStatus();
+
+    @Query("SELECT c.custStatus, COUNT(c) " +
+            "FROM Customer c " +
+            "WHERE (c.custIsDeleted = false OR c.custIsDeleted IS NULL) " +
+            "AND c.custCreateDate BETWEEN :startDate AND :endDate " +
+            "GROUP BY c.custStatus")
+    List<Object[]> countCustomersByStatusBetween(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
 
     @Query("""
     SELECT c 
