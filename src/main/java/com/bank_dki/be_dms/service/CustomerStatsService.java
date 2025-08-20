@@ -14,14 +14,21 @@ public class CustomerStatsService {
     
     private final CustomerRepository customerRepository;
     
-    public List<CustomerStatusCountDto> getCustomerStatusCountGroupByTasks() {
+    public CustomerStatusCountDto getCustomerStatusCountGroupByTasks() {
         List<Object[]> results = customerRepository.countCustomersByStatus();
-        
-        return results.stream()
-                .map(result -> new CustomerStatusCountDto(
-                        (String) result[0], // custStatus
-                        (Long) result[1]    // count
+        CustomerStatusCountDto custStatusCount = new CustomerStatusCountDto();
+        custStatusCount.setCompleted(231);
+        custStatusCount.setTotal(134);
+        List<CustomerStatusCountDto.Categories> categories = results.stream()
+                .map(result -> new CustomerStatusCountDto.Categories(
+                        (String) result[0],
+                        (Long) result[1],
+                        25.0,
+                        "#3B82F6"
                 ))
-                .collect(Collectors.toList());
+                .toList();
+        custStatusCount.setCategories(categories);
+
+        return custStatusCount;
     }
 }

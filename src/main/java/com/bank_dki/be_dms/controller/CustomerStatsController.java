@@ -2,6 +2,7 @@ package com.bank_dki.be_dms.controller;
 
 import com.bank_dki.be_dms.dto.CustomerStatusCountDto;
 import com.bank_dki.be_dms.service.CustomerStatsService;
+import com.bank_dki.be_dms.util.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,8 +20,10 @@ public class CustomerStatsController {
     
     @GetMapping("/status-count")
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
-    public ResponseEntity<List<CustomerStatusCountDto>> getCustomerStatusCountGroupByTasks() {
-        List<CustomerStatusCountDto> result = customerStatsService.getCustomerStatusCountGroupByTasks();
-        return ResponseEntity.ok(result);
+    public ResponseEntity<ApiResponse<CustomerStatusCountDto>> getCustomerStatusCountGroupByTasks() {
+        CustomerStatusCountDto custStatsCount = customerStatsService.getCustomerStatusCountGroupByTasks();
+        ApiResponse<CustomerStatusCountDto> response = ApiResponse.success("Success", custStatsCount);
+
+        return ResponseEntity.ok(response);
     }
 }
