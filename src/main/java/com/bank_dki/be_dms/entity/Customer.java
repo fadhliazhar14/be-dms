@@ -262,7 +262,6 @@ public class Customer {
     @PrePersist
     protected void onCreate() {
         custCreateDate = LocalDateTime.now();
-        custUpdateDate = LocalDateTime.now();
     }
     
     @PreUpdate

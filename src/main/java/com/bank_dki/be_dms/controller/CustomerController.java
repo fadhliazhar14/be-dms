@@ -8,6 +8,7 @@ import com.bank_dki.be_dms.service.CustomerService;
 import com.bank_dki.be_dms.util.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,7 +35,8 @@ public class CustomerController {
             @RequestParam(defaultValue = "desc") String direction,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo
+    ) {
 
         PageRequestDTO pageRequest = new PageRequestDTO();
         pageRequest.setPage(page);
@@ -142,5 +144,33 @@ public class CustomerController {
         ApiResponse<Void> response = ApiResponse.success("CSV has been uploaded successfully", null);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/download")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
+    public ResponseEntity<byte[]> downloadCsv(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "id") String sort,
+            @RequestParam(defaultValue = "desc") String direction,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo
+    ) {
+        PageRequestDTO pageRequest = new PageRequestDTO();
+        pageRequest.setPage(page);
+        pageRequest.setSize(size);
+        pageRequest.setSort(sort);
+        pageRequest.setDirection(direction);
+        pageRequest.setSearch(search);
+        pageRequest.setDateFrom(dateFrom);
+        pageRequest.setDateTo(dateTo);
+
+        byte[] customersInCsv = customerService.downloadCustomersToCsv(pageRequest);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=customers.csv")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(customersInCsv);
     }
 }

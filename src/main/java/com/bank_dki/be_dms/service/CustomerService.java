@@ -6,6 +6,7 @@ import com.bank_dki.be_dms.dto.CustomerDTO;
 import com.bank_dki.be_dms.entity.Customer;
 import com.bank_dki.be_dms.exception.BusinessValidationException;
 import com.bank_dki.be_dms.repository.CustomerRepository;
+import com.bank_dki.be_dms.util.CurrentUserUtils;
 import com.bank_dki.be_dms.util.PageUtil;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.csv.CSVFormat;
@@ -16,11 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -29,25 +28,36 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class CustomerService {
-    
     private final CustomerRepository customerRepository;
-    
+    private final CurrentUserUtils currentUserUtils;
+
+
     public List<CustomerDTO> getAllCustomers() {
-        return customerRepository.findAll().stream()
+        String username = currentUserUtils.getCurrentUsername();
+        boolean isAdmin = currentUserUtils.hasRole("ADMIN");
+        List<Customer> customers = isAdmin ? customerRepository.findAll() : customerRepository.findByCustCreateBy(username);
+
+        return customers.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
     public List<CustomerDTO> getAllActiveCustomers() {
-        return customerRepository.findAllActiveCustomers().stream()
+        String username = currentUserUtils.getCurrentUsername();
+        boolean isAdmin = currentUserUtils.hasRole("ADMIN");
+        List<Customer> customers = isAdmin ? customerRepository.findAllActiveCustomers() : customerRepository.findByCustCreateBy(username);
+
+        return customers.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
     
     public PageResponseDTO<CustomerDTO> getAllActiveCustomers(PageRequestDTO pageRequest) {
+        String username = currentUserUtils.getCurrentUsername();
+        boolean isAdmin = currentUserUtils.hasRole("ADMIN");
         Pageable pageable = PageUtil.createPageable(pageRequest);
 
-        Page<Customer> customerPage = customerRepository.findAllWithSearchAndDateRange(pageRequest.getSearch(), pageRequest.getDateFrom(), pageRequest.getDateTo(), pageable);
+        Page<Customer> customerPage = customerRepository.findAllWithSearchAndDateRange(username, isAdmin, pageRequest.getSearch(), pageRequest.getDateFrom(), pageRequest.getDateTo(), pageable);
 
         List<CustomerDTO> customerResponses = customerPage.getContent().stream()
                 .map(this::convertToDTO)
@@ -90,6 +100,9 @@ public class CustomerService {
 
     @Transactional
     public void saveCustomersFromCsv(MultipartFile file) {
+        String currentUploaderUsername = currentUserUtils.getCurrentUsername();
+        String CUST_STATUS_UNREGISTERED = "Unregistered";
+
         try (Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             if (file.isEmpty()) {
                 throw new BusinessValidationException("File is empty");
@@ -103,7 +116,8 @@ public class CustomerService {
             for (CSVRecord record : records) {
                 Customer customer = new Customer();
                 customer.setCustCifNumber(record.get("custCifNumber"));
-                customer.setCustStatus(record.get("custStatus"));
+
+                customer.setCustStatus(record.get(CUST_STATUS_UNREGISTERED));
                 customer.setCustCabang(record.get("custCabang"));
                 customer.setCustGolNasabah(record.get("custGolNasabah"));
                 customer.setCustRisiko(record.get("custRisiko"));
@@ -111,9 +125,7 @@ public class CustomerService {
                 customer.setCustNoRek(record.get("custNoRek"));
                 customer.setCustTglBuka(record.get("custTglBuka"));
                 customer.setCustHubBank(record.get("custHubBank"));
-                customer.setCustSeqNumber(record.get("custSeqNumber"));
-                customer.setCustCreateBy(record.get("custCreateBy"));
-                customer.setCustUpdateBy(record.get("custUpdateBy"));
+                customer.setCustCreateBy(currentUploaderUsername);
 
                 // Personal Information
                 customer.setPrsnNama(record.get("prsnNama"));
@@ -195,6 +207,46 @@ public class CustomerService {
         } catch (IOException e) {
             throw new BusinessValidationException("Failed to parse CSV file");
         }
+    }
+
+    public byte[] downloadCustomersToCsv(PageRequestDTO pageRequest) {
+        String username = currentUserUtils.getCurrentUsername();
+        boolean isAdmin = currentUserUtils.hasRole("ADMIN");
+        Pageable pageable = PageUtil.createPageable(pageRequest);
+
+        List<Customer> customers = isAdmin ? customerRepository.findAll() :
+                customerRepository.findAllWithSearchAndDateRange(
+                        username,
+                        false,
+                        pageRequest.getSearch(),
+                        pageRequest.getDateFrom(),
+                        pageRequest.getDateTo(),
+                        pageable
+                ).getContent();
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        PrintWriter writer = new PrintWriter(out);
+
+        // Header
+        writer.println("NasabahId,SEQ Number,NasabahNama,NasabahCIF,NasabahAccount,StatusName,Operator,NasabahDeliveryDate");
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        for (Customer c : customers) {
+            writer.printf("%s,%s,%s,%s,%s,%s,%s,%s%n",
+                    c.getCustId(),
+                    c.getCustSeqNumber(),
+                    c.getPrsnNama(),
+                    c.getCustCifNumber(),
+                    c.getCustNoRek(),
+                    c.getCustStatus(),
+                    c.getCustCreateBy(),
+                    c.getCustDeliverDate() != null ? c.getCustDeliverDate().format(dateFormatter) : ""
+            );
+        }
+
+        writer.flush();
+        return out.toByteArray();
     }
     
     public Customer updateCustomer(Short id, CustomerDTO customerDTO) {

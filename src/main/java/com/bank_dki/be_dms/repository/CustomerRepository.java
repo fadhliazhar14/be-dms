@@ -18,6 +18,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Short> {
     Optional<Customer> findByCustCifNumber(String custCifNumber);
     Optional<Customer> findByCardNik(String cardNik);
     Optional<Customer> findByCardNpwp(String cardNpwp);
+    List<Customer> findByCustCreateBy(String username);
     
     @Query("SELECT c FROM Customer c WHERE c.custIsDeleted = false OR c.custIsDeleted IS NULL")
     List<Customer> findAllActiveCustomers();
@@ -51,11 +52,23 @@ public interface CustomerRepository extends JpaRepository<Customer, Short> {
     SELECT c 
     FROM Customer c 
     WHERE 
-        (:search IS NULL OR :search = '' OR 
-        LOWER(c.prsnNama) LIKE LOWER(CONCAT('%', :search, '%')) OR
-        c.custNoRek LIKE CONCAT('%', :search, '%'))
+        (:search IS NULL 
+        OR :search = ''  
+        OR LOWER(c.prsnNama) LIKE LOWER(CONCAT('%', :search, '%'))
+        OR c.custNoRek LIKE CONCAT('%', :search, '%'))
         AND (:dateFrom IS NULL OR c.custDeliverDate >= :dateFrom)
         AND (:dateTo IS NULL OR c.custDeliverDate <= :dateTo)
+        AND (
+            :isAdmin = true
+            OR c.custCreateBy = :createdBy
+        )
 """)
-    Page<Customer> findAllWithSearchAndDateRange(@Param("search") String search, @Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, Pageable pageable);
+    Page<Customer> findAllWithSearchAndDateRange(
+            @Param("createdBy") String createdBy,
+            @Param("isAdmin") boolean isAdmin,
+            @Param("search") String search,
+            @Param("dateFrom") LocalDate dateFrom,
+            @Param("dateTo") LocalDate dateTo,
+            Pageable pageable
+    );
 }
