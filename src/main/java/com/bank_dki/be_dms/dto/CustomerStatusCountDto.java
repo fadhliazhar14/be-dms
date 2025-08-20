@@ -10,8 +10,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CustomerStatusCountDto {
-    private int total;
-    private int completed;
+    private Long total;
+    private Long completed;
     private List<Categories> categories;
 
     @Data

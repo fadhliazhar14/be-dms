@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+
 @Service
 @RequiredArgsConstructor
 public class CustomerService {
@@ -34,7 +35,7 @@ public class CustomerService {
 
     public List<CustomerDTO> getAllCustomers() {
         String username = currentUserUtils.getCurrentUsername();
-        boolean isAdmin = currentUserUtils.hasRole("ADMIN");
+        boolean isAdmin = currentUserUtils.hasRole("ROLE_ADMIN");
         List<Customer> customers = isAdmin ? customerRepository.findAll() : customerRepository.findByCustCreateBy(username);
 
         return customers.stream()
@@ -44,7 +45,7 @@ public class CustomerService {
 
     public List<CustomerDTO> getAllActiveCustomers() {
         String username = currentUserUtils.getCurrentUsername();
-        boolean isAdmin = currentUserUtils.hasRole("ADMIN");
+        boolean isAdmin = currentUserUtils.hasRole("ROLE_ADMIN");
         List<Customer> customers = isAdmin ? customerRepository.findAllActiveCustomers() : customerRepository.findByCustCreateBy(username);
 
         return customers.stream()
@@ -54,7 +55,7 @@ public class CustomerService {
     
     public PageResponseDTO<CustomerDTO> getAllActiveCustomers(PageRequestDTO pageRequest) {
         String username = currentUserUtils.getCurrentUsername();
-        boolean isAdmin = currentUserUtils.hasRole("ADMIN");
+        boolean isAdmin = currentUserUtils.hasRole("ROLE_ADMIN");
         Pageable pageable = PageUtil.createPageable(pageRequest);
 
         Page<Customer> customerPage = customerRepository.findAllWithSearchAndDateRange(username, isAdmin, pageRequest.getSearch(), pageRequest.getDateFrom(), pageRequest.getDateTo(), pageable);
@@ -211,7 +212,7 @@ public class CustomerService {
 
     public byte[] downloadCustomersToCsv(PageRequestDTO pageRequest) {
         String username = currentUserUtils.getCurrentUsername();
-        boolean isAdmin = currentUserUtils.hasRole("ADMIN");
+        boolean isAdmin = currentUserUtils.hasRole("ROLE_ADMIN");
         Pageable pageable = PageUtil.createPageable(pageRequest);
 
         List<Customer> customers = isAdmin ? customerRepository.findAll() :

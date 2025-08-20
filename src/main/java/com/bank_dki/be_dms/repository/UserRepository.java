@@ -1,6 +1,5 @@
 package com.bank_dki.be_dms.repository;
 
-import com.bank_dki.be_dms.dto.OperatorWithCountDto;
 import com.bank_dki.be_dms.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

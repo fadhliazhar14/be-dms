@@ -43,8 +43,26 @@ public interface CustomerRepository extends JpaRepository<Customer, Short> {
             "FROM Customer c " +
             "WHERE (c.custIsDeleted = false OR c.custIsDeleted IS NULL) " +
             "AND c.custCreateDate BETWEEN :startDate AND :endDate " +
+            "AND (:isAdmin = true OR c.custCreateBy = :createdBy)" +
             "GROUP BY c.custStatus")
     List<Object[]> countCustomersByStatusBetween(
+            @Param("isAdmin") boolean isAdmin,
+            @Param("createdBy") String createdBy,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
+
+    @Query("""
+    SELECT 
+        SUM(CASE WHEN c.custStatus = 'Unregistered' THEN 1 ELSE 0 END),
+        SUM(CASE WHEN c.custStatus <> 'Unregistered' THEN 1 ELSE 0 END)
+    FROM Customer c
+    WHERE (c.custIsDeleted = false OR c.custIsDeleted IS NULL)
+      AND c.custCreateDate BETWEEN :startDate AND :endDate
+      AND (:isAdmin = true OR c.custCreateBy = :createdBy)
+""")
+    Object getTotalAndCompleted(
+            @Param("isAdmin") boolean isAdmin,
+            @Param("createdBy") String createdBy,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);
 
@@ -71,4 +89,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Short> {
             @Param("dateTo") LocalDate dateTo,
             Pageable pageable
     );
+
+
 }
