@@ -106,6 +106,15 @@ public class CustomerController {
                     .body(new MessageResponse("Error: " + e.getMessage()));
         }
     }
+
+    @PatchMapping("/register/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
+    public ResponseEntity<ApiResponse<Void>> registerCustomer(@PathVariable Short id) {
+        customerService.registerCustomer(id);
+        ApiResponse<Void> response = ApiResponse.success("Customer has been successfully registered", null);
+
+        return ResponseEntity.ok(response);
+    }
     
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")

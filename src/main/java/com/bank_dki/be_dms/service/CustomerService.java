@@ -4,8 +4,12 @@ import com.bank_dki.be_dms.common.PageRequestDTO;
 import com.bank_dki.be_dms.common.PageResponseDTO;
 import com.bank_dki.be_dms.dto.CustomerDTO;
 import com.bank_dki.be_dms.entity.Customer;
+import com.bank_dki.be_dms.entity.Nomor;
+import com.bank_dki.be_dms.entity.Task;
 import com.bank_dki.be_dms.exception.BusinessValidationException;
 import com.bank_dki.be_dms.repository.CustomerRepository;
+import com.bank_dki.be_dms.repository.NomorRepository;
+import com.bank_dki.be_dms.repository.TaskRepository;
 import com.bank_dki.be_dms.util.CurrentUserUtils;
 import com.bank_dki.be_dms.util.PageUtil;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +34,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CustomerService {
     private final CustomerRepository customerRepository;
+    private final TaskRepository taskRepository;
+    private final NomorRepository nomorRepository;
     private final CurrentUserUtils currentUserUtils;
 
 
@@ -102,7 +108,7 @@ public class CustomerService {
     @Transactional
     public void saveCustomersFromCsv(MultipartFile file) {
         String currentUploaderUsername = currentUserUtils.getCurrentUsername();
-        String CUST_STATUS_UNREGISTERED = "Unregistered";
+        String CUST_STATUS_DELIVER = "Deliver";
 
         try (Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             if (file.isEmpty()) {
@@ -118,7 +124,7 @@ public class CustomerService {
                 Customer customer = new Customer();
                 customer.setCustCifNumber(record.get("custCifNumber"));
 
-                customer.setCustStatus(record.get(CUST_STATUS_UNREGISTERED));
+                customer.setCustStatus(record.get(CUST_STATUS_DELIVER));
                 customer.setCustCabang(record.get("custCabang"));
                 customer.setCustGolNasabah(record.get("custGolNasabah"));
                 customer.setCustRisiko(record.get("custRisiko"));
@@ -275,6 +281,24 @@ public class CustomerService {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
         customer.setCustIsDeleted(true);
+        customerRepository.save(customer);
+    }
+
+    public void registerCustomer(Short id) {
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new BusinessValidationException("Customer not found"));
+        Task status = taskRepository.findById((short) 4)
+                .orElseThrow(() -> new BusinessValidationException("Task not found"));
+
+        short last = nomorRepository.findMaxNomorLast();
+        short nextNumber = (short) (last + 1);
+
+        Nomor nomor = new Nomor();
+        nomor.setNomorLast(nextNumber);
+        nomorRepository.save(nomor);
+
+        customer.setCustSeqNumber(String.valueOf(nextNumber));
+        customer.setCustStatus(status.getTaskName());
         customerRepository.save(customer);
     }
     
