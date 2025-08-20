@@ -2,6 +2,7 @@ package com.bank_dki.be_dms.service;
 
 import com.bank_dki.be_dms.common.PageRequestDTO;
 import com.bank_dki.be_dms.common.PageResponseDTO;
+import com.bank_dki.be_dms.dto.OperatorWithCountDto;
 import com.bank_dki.be_dms.dto.UserCreateRequest;
 import com.bank_dki.be_dms.dto.UserDTO;
 import com.bank_dki.be_dms.dto.UserUpdateRequest;
@@ -50,18 +51,23 @@ public class UserService {
                 .map(this::convertToDTO);
     }
 
-    public PageResponseDTO<UserDTO> getAllOperators(PageRequestDTO pageRequest) {
+    public PageResponseDTO<OperatorWithCountDto> getAllOperators(PageRequestDTO pageRequest) {
         Pageable pageable = PageUtil.createPageable(pageRequest);
 
-        Page<User> userPage = userRepository.findByRoleIdAndSearch((short) 2, pageRequest.getSearch(), pageable);
-        List<UserDTO> userResponse = userPage.getContent().stream()
-                .map(this::convertToDTO)
+        Page<Object[]> operatorPage = userRepository.findOperatorsWithCustCount((short) 2, pageRequest.getSearch(), pageable);
+        List<OperatorWithCountDto> operatorResponse = operatorPage.getContent().stream()
+                .map(obj -> {
+                    User user = (User) obj[0];
+                    Long count = (Long) obj[1];
+
+                    return new OperatorWithCountDto(convertToDTO(user), count);
+                })
                 .toList();
 
         return PageUtil.createPageResponse(
-                userResponse,
+                operatorResponse,
                 pageable,
-                userPage.getTotalElements()
+                operatorPage.getTotalElements()
         );
     }
     

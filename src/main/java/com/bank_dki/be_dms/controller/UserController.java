@@ -2,10 +2,7 @@ package com.bank_dki.be_dms.controller;
 
 import com.bank_dki.be_dms.common.PageRequestDTO;
 import com.bank_dki.be_dms.common.PageResponseDTO;
-import com.bank_dki.be_dms.dto.MessageResponse;
-import com.bank_dki.be_dms.dto.UserCreateRequest;
-import com.bank_dki.be_dms.dto.UserDTO;
-import com.bank_dki.be_dms.dto.UserUpdateRequest;
+import com.bank_dki.be_dms.dto.*;
 import com.bank_dki.be_dms.service.UserService;
 import com.bank_dki.be_dms.util.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -123,7 +120,7 @@ public class UserController {
 
     @GetMapping("/operators")
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
-    public ResponseEntity<ApiResponse<PageResponseDTO<UserDTO>>> getOperators(
+    public ResponseEntity<ApiResponse<PageResponseDTO<OperatorWithCountDto>>> getOperators(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "id") String sort,
@@ -137,8 +134,8 @@ public class UserController {
         pageRequest.setDirection(direction);
         pageRequest.setSearch(search);
 
-        PageResponseDTO<UserDTO> operators = userService.getAllOperators(pageRequest);
-        ApiResponse<PageResponseDTO<UserDTO>> response = ApiResponse.success("Success", operators);
+        PageResponseDTO<OperatorWithCountDto> operators = userService.getAllOperators(pageRequest);
+        ApiResponse<PageResponseDTO<OperatorWithCountDto>> response = ApiResponse.success("Success", operators);
 
         return ResponseEntity.ok(response);
     }

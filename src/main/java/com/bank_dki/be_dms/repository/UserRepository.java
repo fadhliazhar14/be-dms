@@ -1,5 +1,6 @@
 package com.bank_dki.be_dms.repository;
 
+import com.bank_dki.be_dms.dto.OperatorWithCountDto;
 import com.bank_dki.be_dms.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,4 +41,17 @@ public interface UserRepository extends JpaRepository<User, Short> {
             "WHERE u.roleId = :roleId " +
             "AND (:search IS NULL OR :search = '' OR LOWER(u.userName) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<User> findByRoleIdAndSearch(@Param("roleId") Short roleId, @Param("search") String search, Pageable pageable);
+
+    @Query("""
+    SELECT u, COUNT(c)
+    FROM User u
+    LEFT JOIN Customer c ON c.custCreateBy = u.userName
+    WHERE u.roleId = :roleId
+      AND (:search IS NULL OR :search = '' OR LOWER(u.userName) LIKE LOWER(CONCAT('%', :search, '%')))
+    GROUP BY u.id, u.userName, u.roleId
+""")
+    Page<Object[]> findOperatorsWithCustCount(
+            @Param("roleId") Short roleId,
+            @Param("search") String search,
+            Pageable pageable);
 }
