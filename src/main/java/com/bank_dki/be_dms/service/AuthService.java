@@ -42,8 +42,9 @@ public class AuthService {
         ).orElseThrow(() -> new RuntimeException("User not found"));
         
         String role = user.getRole() != null ? user.getRole().getRoleName() : "OPERATOR";
+        long expiredAt = jwtUtil.extractExpiration(jwt).getTime() / 1000;
         
-        return new JwtResponse(jwt, user.getUserName(), user.getUserEmail(), role);
+        return new JwtResponse(jwt, user.getUserName(), user.getUserEmail(), role, expiredAt);
     }
     
     public MessageResponse registerUser(SignupRequest signUpRequest) {
