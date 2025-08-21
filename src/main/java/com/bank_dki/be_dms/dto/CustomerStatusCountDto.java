@@ -23,4 +23,12 @@ public class CustomerStatusCountDto {
         private double percentage;
         private String color;
     }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CategoriesForOperator {
+        private String name;
+        private Long count;
+    }
 }

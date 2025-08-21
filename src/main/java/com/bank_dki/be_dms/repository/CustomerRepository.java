@@ -1,6 +1,7 @@
 package com.bank_dki.be_dms.repository;
 
 import com.bank_dki.be_dms.dto.CustomerDocDTO;
+import com.bank_dki.be_dms.dto.CustomerStatusCountDto;
 import com.bank_dki.be_dms.entity.Customer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -52,6 +53,23 @@ public interface CustomerRepository extends JpaRepository<Customer, Short> {
             @Param("createdBy") String createdBy,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);
+
+    @Query("""
+    SELECT new com.bank_dki.be_dms.dto.CustomerStatusCountDto$CategoriesForOperator(
+        CASE WHEN c.custStatus = 'Scanning' THEN 'Scanning' ELSE 'Unscanned' END,
+        COUNT(c)
+    )
+    FROM Customer c
+    WHERE (c.custIsDeleted = false OR c.custIsDeleted IS NULL)
+      AND c.custCreateDate BETWEEN :startDate AND :endDate
+      AND c.custCreateBy = :createdBy
+    GROUP BY CASE WHEN c.custStatus = 'Scanning' THEN 'Scanning' ELSE 'Unscanned' END
+""")
+    List<CustomerStatusCountDto.CategoriesForOperator> getCategoriesForOperator(
+            @Param("createdBy") String createdBy,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
+
 
     @Query("""
     SELECT 
