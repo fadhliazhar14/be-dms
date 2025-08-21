@@ -20,6 +20,7 @@ public class CurrentUserUtils {
         }
         return (authentication != null) ? authentication.getName() : "";
     }
+
     public List<String> getCurrentUserRoles() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -32,7 +33,6 @@ public class CurrentUserUtils {
     }
 
     public boolean hasRole(String role) {
-//        log.info("Current roles : " + getCurrentUserRoles());
         return getCurrentUserRoles().contains(role);
     }
 

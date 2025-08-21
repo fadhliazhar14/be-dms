@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,107 +20,103 @@ import java.util.List;
 public class CustomerStatsService {
     private final CustomerRepository customerRepository;
     private final CurrentUserUtils currentUserUtils;
-    
+
     public CustomerStatusCountDto getCustomerStatusCountGroupByTasks(String filter) {
-        LocalDateTime startDate = LocalDateTime.now();
-        LocalDateTime endDate = LocalDateTime.now();
+        LocalDateTime[] dateRange = calculateDateRange(filter);
+        LocalDateTime startDate = dateRange[0];
+        LocalDateTime endDate = dateRange[1];
+
         String username = currentUserUtils.getCurrentUsername();
         boolean isAdmin = currentUserUtils.hasRole("ROLE_ADMIN");
 
-        switch (filter.toLowerCase()) {
-            case "weekly":
-                startDate = startDate.with(DayOfWeek.MONDAY);
-                endDate = endDate.with(DayOfWeek.SUNDAY);
-                break;
-            case "monthly" :
-                startDate = startDate
-                        .with(TemporalAdjusters.firstDayOfMonth())
-                        .withHour(0).withMinute(0).withSecond(0).withNano(0);
-                endDate = endDate
-                        .with(TemporalAdjusters.lastDayOfMonth())
-                        .withHour(0).withMinute(0).withSecond(0).withNano(0);
-                break;
-            case "yearly" :
-                startDate = startDate
-                        .with(TemporalAdjusters.firstDayOfYear())
-                        .withHour(0).withMinute(0).withSecond(0).withNano(0);
-                endDate = endDate
-                        .with(TemporalAdjusters.lastDayOfYear())
-                        .withHour(0).withMinute(0).withSecond(0).withNano(0);
-        }
+        CustomerStatusCountDto dto = new CustomerStatusCountDto();
 
-        CustomerStatusCountDto custStatusCount = new CustomerStatusCountDto();
+        List<CategoryData> categoriesData;
+        long total;
+        long completed;
+
         if (isAdmin) {
             Object[] summary = (Object[]) customerRepository.getTotalAndCompleted(true, username, startDate, endDate);
             List<Object[]> results = customerRepository.countCustomersByStatusBetween(true, username, startDate, endDate);
-            Long total = summary[0] != null ? ((Number) summary[0]).longValue() : 0L;
-            Long completed = summary[1] != null ? ((Number) summary[1]).longValue() : 0L;
-            custStatusCount.setTotal(total);
-            custStatusCount.setCompleted(completed);
 
-            List<CustomerStatusCountDto.Categories> categories = results.stream()
-                    .map(result -> {
-                        String status = (String) result[0];
-                        Long count = result[1] != null ? ((Number) result[1]).longValue() : 0L;
-                        double percentage = completed == 0 ? 0.0 :  Math.round((count * 100.0 / completed) * 10.0) / 10.0;
+            total = summary[0] != null ? ((Number) summary[0]).longValue() : 0L;
+            completed = summary[1] != null ? ((Number) summary[1]).longValue() : 0L;
 
-                        return new CustomerStatusCountDto.Categories(
-                                status,
-                                count,
-                                percentage,
-                                "#3B82F6"
-                        );
-                    })
+            categoriesData = results.stream()
+                    .map(r -> new CategoryData((String) r[0], r[1] != null ? ((Number) r[1]).longValue() : 0L))
                     .toList();
-            custStatusCount.setCategories(categories);
         } else {
             List<CustomerStatusCountDto.CategoriesForOperator> rawCategories =
-                    customerRepository.getCategoriesForOperator(username, startDate, endDate);
+                    ensureScanningCategoryExists(customerRepository.getCategoriesForOperator(username, startDate, endDate));
 
-            boolean hasScanning = rawCategories.stream()
-                    .anyMatch(c -> "Scanning".equalsIgnoreCase(c.getName()));
-
-            if (!hasScanning) {
-                // tambahkan manual jika tidak ada
-                rawCategories = new ArrayList<>(rawCategories); // supaya mutable
-                rawCategories.add(new CustomerStatusCountDto.CategoriesForOperator("Scanning", 0L));
-            }
-
-            long total = rawCategories.stream()
-                    .mapToLong(CustomerStatusCountDto.CategoriesForOperator::getCount)
-                    .sum();
-
-            long completed = rawCategories.stream()
+            total = rawCategories.stream().mapToLong(CustomerStatusCountDto.CategoriesForOperator::getCount).sum();
+            completed = rawCategories.stream()
                     .filter(c -> "Scanning".equalsIgnoreCase(c.getName()))
                     .mapToLong(CustomerStatusCountDto.CategoriesForOperator::getCount)
                     .sum();
 
-            List<CustomerStatusCountDto.Categories> categories = rawCategories.stream()
-                    .map(c -> {
-                        double percentage = total == 0 ? 0.0
-                                : Math.round((c.getCount() * 100.0 / total) * 10.0) / 10.0;
-
-                        String color;
-                        switch (c.getName()) {
-                            case "Scanning"   -> color = "#3B82F6"; // biru
-                            case "Unscanned"  -> color = "#EF4444"; // merah
-                            default           -> color = "#9CA3AF"; // abu-abu
-                        }
-
-                        return new CustomerStatusCountDto.Categories(
-                                c.getName(),
-                                c.getCount(),
-                                percentage,
-                                color
-                        );
-                    })
+            categoriesData = rawCategories.stream()
+                    .map(c -> new CategoryData(c.getName(), c.getCount()))
                     .toList();
-
-            custStatusCount.setTotal(total);
-            custStatusCount.setCompleted(completed);
-            custStatusCount.setCategories(categories);
         }
 
-        return custStatusCount;
+        List<CustomerStatusCountDto.Categories> categories = categoriesData.stream()
+                .map(cd -> mapToCategory(cd.name, cd.count, isAdmin ? completed : total, getColorForCategory(cd.name)))
+                .toList();
+
+        dto.setTotal(total);
+        dto.setCompleted(completed);
+        dto.setCategories(categories);
+
+        return dto;
     }
+
+    // ----- Helper Classes & Methods -----
+    private record CategoryData(String name, long count) {}
+
+    private LocalDateTime[] calculateDateRange(String filter) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime start = now;
+        LocalDateTime end = now;
+
+        switch (filter.toLowerCase()) {
+            case "weekly" -> {
+                start = now.with(DayOfWeek.MONDAY);
+                end = now.with(DayOfWeek.SUNDAY);
+            }
+            case "monthly" -> {
+                start = now.with(TemporalAdjusters.firstDayOfMonth()).truncatedTo(ChronoUnit.DAYS);
+                end = now.with(TemporalAdjusters.lastDayOfMonth()).truncatedTo(ChronoUnit.DAYS);
+            }
+            case "yearly" -> {
+                start = now.with(TemporalAdjusters.firstDayOfYear()).truncatedTo(ChronoUnit.DAYS);
+                end = now.with(TemporalAdjusters.lastDayOfYear()).truncatedTo(ChronoUnit.DAYS);
+            }
+        }
+        return new LocalDateTime[]{start, end};
+    }
+
+    private List<CustomerStatusCountDto.CategoriesForOperator> ensureScanningCategoryExists(List<CustomerStatusCountDto.CategoriesForOperator> categories) {
+        boolean hasScanning = categories.stream().anyMatch(c -> "Scanning".equalsIgnoreCase(c.getName()));
+        if (!hasScanning) {
+            categories = new ArrayList<>(categories);
+            categories.add(new CustomerStatusCountDto.CategoriesForOperator("Scanning", 0L));
+        }
+        return categories;
+    }
+
+    private CustomerStatusCountDto.Categories mapToCategory(String name, long count, long totalForPercentage, String color) {
+        double percentage = totalForPercentage == 0 ? 0.0
+                : Math.round((count * 100.0 / totalForPercentage) * 10.0) / 10.0;
+        return new CustomerStatusCountDto.Categories(name, count, percentage, color);
+    }
+
+    private String getColorForCategory(String categoryName) {
+        return switch (categoryName) {
+            case "Scanning" -> "#3B82F6";
+            case "Unscanned" -> "#EF4444";
+            default -> "#9CA3AF";
+        };
+    }
+
 }
