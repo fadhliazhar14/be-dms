@@ -342,6 +342,8 @@ public class CustomerService {
         dto.setCustUpdateDate(customer.getCustUpdateDate());
         dto.setCustCreateBy(customer.getCustCreateBy());
         dto.setCustUpdateBy(customer.getCustUpdateBy());
+        dto.setCustFilePath(customer.getCustFilePath());
+        dto.setCustFileName(customer.getCustFileName());
         
         // Personal Information
         dto.setPrsnNama(customer.getPrsnNama());
