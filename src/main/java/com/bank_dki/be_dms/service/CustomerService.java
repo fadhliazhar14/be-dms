@@ -297,7 +297,12 @@ public class CustomerService {
         nomor.setNomorLast(nextNumber);
         nomorRepository.save(nomor);
 
-        customer.setCustSeqNumber(String.valueOf(nextNumber));
+        LocalDate deliverDate = customer.getCustDeliverDate();
+        String formattedSeqDeliverDate = deliverDate.format(DateTimeFormatter.ofPattern("yyyy/MM"));
+        String formattedSeqNumber = String.format("%04d", nextNumber);
+        String custSeqNumber = "WI001/" + formattedSeqDeliverDate + "/" + formattedSeqNumber;
+
+        customer.setCustSeqNumber(custSeqNumber);
         customer.setCustStatus(status.getTaskName());
         customerRepository.save(customer);
     }
