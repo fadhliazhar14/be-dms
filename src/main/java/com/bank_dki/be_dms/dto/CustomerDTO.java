@@ -26,6 +26,8 @@ public class CustomerDTO {
     private LocalDateTime custUpdateDate;
     private String custCreateBy;
     private String custUpdateBy;
+    private String custFilePath;
+    private String custFileName;
     
     // Personal Information
     private String prsnNama;

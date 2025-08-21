@@ -1,9 +1,11 @@
 package com.bank_dki.be_dms.repository;
 
+import com.bank_dki.be_dms.dto.CustomerDocDTO;
 import com.bank_dki.be_dms.entity.Customer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -90,5 +92,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Short> {
             Pageable pageable
     );
 
-
+    @Query("SELECT new com.bank_dki.be_dms.dto.CustomerDocDTO(c.custFilePath, c.custFileName) " +
+            "FROM Customer c WHERE c.custId = :custId")
+    Optional<CustomerDocDTO> findCustFileByCustId(@Param("custId") Short custId);
 }

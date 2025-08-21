@@ -258,6 +258,12 @@ public class Customer {
     @Lob
     @Column(name = "CustFileBlob")
     private byte[] custFileBlob;
+
+    @Column(name = "CustFilePath")
+    private String custFilePath;
+
+    @Column(name = "CustFileName")
+    private String custFileName;
     
     @PrePersist
     protected void onCreate() {
