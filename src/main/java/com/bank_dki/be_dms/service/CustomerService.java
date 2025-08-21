@@ -124,7 +124,7 @@ public class CustomerService {
                 Customer customer = new Customer();
                 customer.setCustCifNumber(record.get("custCifNumber"));
 
-                customer.setCustStatus(record.get(CUST_STATUS_DELIVER));
+                customer.setCustStatus(CUST_STATUS_DELIVER);
                 customer.setCustCabang(record.get("custCabang"));
                 customer.setCustGolNasabah(record.get("custGolNasabah"));
                 customer.setCustRisiko(record.get("custRisiko"));
