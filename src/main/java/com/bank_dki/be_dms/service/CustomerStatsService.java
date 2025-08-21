@@ -113,9 +113,11 @@ public class CustomerStatsService {
 
     private String getColorForCategory(String categoryName) {
         return switch (categoryName) {
-            case "Scanning" -> "#3B82F6";
-            case "Unscanned" -> "#EF4444";
-            default -> "#9CA3AF";
+            case "Scanning" -> "#5fa1db";
+            case "Pengkaitan" -> "#f99551";
+            case "Pengkinian" -> "#c678d9";
+            case "Register" -> "#73c982";
+            default -> "#d0d5dd";
         };
     }
 
