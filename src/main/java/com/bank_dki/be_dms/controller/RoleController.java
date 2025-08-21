@@ -26,7 +26,6 @@ public class RoleController {
     }
     
     @GetMapping("/active")
-//    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<List<Role>> getAllActiveRoles() {
         return ResponseEntity.ok(roleService.getAllActiveRoles());
     }
