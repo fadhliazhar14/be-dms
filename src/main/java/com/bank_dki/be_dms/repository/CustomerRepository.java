@@ -94,6 +94,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Short> {
         OR :search = ''  
         OR LOWER(c.prsnNama) LIKE LOWER(CONCAT('%', :search, '%'))
         OR c.custNoRek LIKE CONCAT('%', :search, '%'))
+        AND (c.custIsDeleted = false OR c.custIsDeleted IS NULL)
         AND (:dateFrom IS NULL OR c.custDeliverDate >= :dateFrom)
         AND (:dateTo IS NULL OR c.custDeliverDate <= :dateTo)
         AND (
