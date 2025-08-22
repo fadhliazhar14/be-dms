@@ -73,8 +73,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Short> {
 
     @Query("""
     SELECT 
-        SUM(CASE WHEN c.custStatus = 'Unregistered' THEN 1 ELSE 0 END),
-        SUM(CASE WHEN c.custStatus <> 'Unregistered' THEN 1 ELSE 0 END)
+        SUM(CASE WHEN c.custStatus = 'Deliver' THEN 1 ELSE 0 END),
+        SUM(CASE WHEN c.custStatus <> 'Deliver' THEN 1 ELSE 0 END)
     FROM Customer c
     WHERE (c.custIsDeleted = false OR c.custIsDeleted IS NULL)
       AND c.custCreateDate BETWEEN :startDate AND :endDate
