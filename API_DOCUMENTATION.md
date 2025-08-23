@@ -429,15 +429,15 @@ curl -X POST http://localhost:8080/api/auth/signin \
     "userHashPassword": "password123"
   }'
 
-# Response akan memberikan token
+# Response akan memberikan accesstoken
 # {
-#   "token": "eyJhbGciOiJIUzI1NiJ9...",
+#   "accesstoken": "eyJhbGciOiJIUzI1NiJ9...",
 #   "username": "admin",
 #   "email": "admin@bankdki.com",
 #   "role": "ADMIN"
 # }
 
-# 2. Gunakan token untuk akses endpoint protected
+# 2. Gunakan accesstoken untuk akses endpoint protected
 curl -X GET http://localhost:8080/api/admin/users \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..."
 ```
