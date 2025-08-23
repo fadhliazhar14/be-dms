@@ -1,4 +1,4 @@
-package com.bank_dki.be_dms.common;
+package com.bank_dki.be_dms.dto;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

@@ -1,4 +1,4 @@
-package com.bank_dki.be_dms.common;
+package com.bank_dki.be_dms.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

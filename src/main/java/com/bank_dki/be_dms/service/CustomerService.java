@@ -1,7 +1,7 @@
 package com.bank_dki.be_dms.service;
 
-import com.bank_dki.be_dms.common.PageRequestDTO;
-import com.bank_dki.be_dms.common.PageResponseDTO;
+import com.bank_dki.be_dms.dto.PageRequestDTO;
+import com.bank_dki.be_dms.dto.PageResponseDTO;
 import com.bank_dki.be_dms.dto.CustomerDTO;
 import com.bank_dki.be_dms.entity.Customer;
 import com.bank_dki.be_dms.entity.Nomor;

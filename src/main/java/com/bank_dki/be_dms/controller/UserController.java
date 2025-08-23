@@ -1,7 +1,7 @@
 package com.bank_dki.be_dms.controller;
 
-import com.bank_dki.be_dms.common.PageRequestDTO;
-import com.bank_dki.be_dms.common.PageResponseDTO;
+import com.bank_dki.be_dms.dto.PageRequestDTO;
+import com.bank_dki.be_dms.dto.PageResponseDTO;
 import com.bank_dki.be_dms.dto.*;
 import com.bank_dki.be_dms.service.UserService;
 import com.bank_dki.be_dms.util.ApiResponse;

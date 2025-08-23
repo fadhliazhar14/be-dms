@@ -1,7 +1,7 @@
 package com.bank_dki.be_dms.util;
 
-import com.bank_dki.be_dms.common.PageRequestDTO;
-import com.bank_dki.be_dms.common.PageResponseDTO;
+import com.bank_dki.be_dms.dto.PageRequestDTO;
+import com.bank_dki.be_dms.dto.PageResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
