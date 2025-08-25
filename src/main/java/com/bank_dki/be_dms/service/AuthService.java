@@ -53,13 +53,13 @@ public class AuthService {
         long refreshTokenExpiredAt = refreshToken.getExpiryDate().getEpochSecond();
 
         return new JwtResponse(jwt,
+                acessTokenExpiredAt,
                 refreshToken.getToken(),
+                refreshTokenExpiredAt,
                 "Bearer",
                 user.getUserName(),
                 user.getUserEmail(),
-                role,
-                acessTokenExpiredAt,
-                refreshTokenExpiredAt
+                role
         );
     }
     
