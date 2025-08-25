@@ -6,10 +6,10 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class JwtResponse {
-    private String accesstoken;
-    private long acessTokenExpiry;
+    private String accessToken;
+    private long accessTokenExpiry;
     private String refreshToken;
-    private long refrshtTokenExpiry;
+    private long refreshTokenExpiry;
     private String type;
     private String username;
     private String email;
@@ -18,7 +18,7 @@ public class JwtResponse {
     @Data
     @AllArgsConstructor
     public static class JwtResponseForRefresh {
-        private String accesstoken;
-        private long acessTokenExpiry;
+        private String accessToken;
+        private long accessTokenExpiry;
     }
 }
