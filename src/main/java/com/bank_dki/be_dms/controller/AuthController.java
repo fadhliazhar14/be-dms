@@ -59,8 +59,8 @@ public class AuthController {
                     JwtResponse.JwtResponseForRefresh accessToken = authService.generateNewAccessToken(username);
                     return ResponseEntity.ok(
                             new TokenRefreshResponse(
-                                    accessToken.getAccesstoken(),
-                                    accessToken.getAcessTokenExpiry(),
+                                    accessToken.getAccessToken(),
+                                    accessToken.getAccessTokenExpiry(),
                                     newToken.getToken(),
                                     newToken.getExpiryDate().getEpochSecond()
                             )
