@@ -7,13 +7,13 @@ import lombok.Data;
 @AllArgsConstructor
 public class JwtResponse {
     private String accesstoken;
+    private long acessTokenExpiry;
     private String refreshToken;
+    private long refrshtTokenExpiry;
     private String type;
     private String username;
     private String email;
     private String role;
-    private long acessTokenExpiry;
-    private long refrshtTokenExpiry;
 
     @Data
     @AllArgsConstructor

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rencana Kerja Code Review &amp; Perbaikan - be-dms</title>
+  <style>
+    :root{
+      --bg:#0f172a;
+      --card:#111827;
+      --muted:#94a3b8;
+      --text:#e5e7eb;
+      --accent:#22d3ee;
+      --accent2:#a78bfa;
+      --danger:#ef4444;
+      --warn:#f59e0b;
+      --ok:#10b981;
+      --chip:#1f2937;
+      --border:#1f2937;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Roboto,system-ui,Arial,sans-serif;line-height:1.55}
+    a{color:var(--accent)}
+    .container{max-width:1100px;margin:0 auto;padding:24px}
+    header{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;margin-bottom:24px}
+    .title{display:flex;flex-direction:column;gap:6px}
+    h1{font-size:28px;margin:0}
+    .subtitle{color:var(--muted);font-size:14px}
+    .badge{display:inline-flex;gap:8px;align-items:center;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,var(--chip),#0b1220);border:1px solid var(--border);color:var(--muted);font-size:12px}
+    .grid{display:grid;gap:16px}
+    @media(min-width:900px){.grid-2{grid-template-columns:1fr 1fr}}
+    section.card{background:linear-gradient(180deg,var(--card),#0d1424);border:1px solid var(--border);border-radius:12px;padding:18px}
+    section.card h2{margin:0 0 10px 0;font-size:18px}
+    section.card h3{margin:12px 0 8px 0;font-size:16px}
+    p{margin:8px 0}
+    ul{margin:8px 0 8px 20px}
+    code,kbd{background:#0b1020;border:1px solid var(--border);padding:1px 6px;border-radius:6px;color:#cbd5e1}
+    pre{background:#0b1020;border:1px solid var(--border);padding:12px;border-radius:10px;overflow:auto}
+    .pill{display:inline-block;margin:2px 6px 2px 0;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--muted);font-size:12px}
+    .chip{display:inline-flex;gap:6px;align-items:center;padding:4px 10px;border-radius:999px;background:#0b1020;border:1px solid var(--border);font-size:12px}
+    .prio{font-weight:600;padding:2px 8px;border-radius:999px;border:1px solid var(--border)}
+    .p0{color:#fecaca;background:rgba(239,68,68,0.08)}
+    .p1{color:#fde68a;background:rgba(245,158,11,0.08)}
+    .p2{color:#bbf7d0;background:rgba(16,185,129,0.08)}
+    .ok{color:var(--ok)} .warn{color:var(--warn)} .danger{color:var(--danger)}
+    .list-condensed li{margin:6px 0}
+    .kpi{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0}
+    .kpi .chip{background:linear-gradient(180deg,#0b1020,#0a0f1c)}
+    footer{margin:28px 0 12px 0;color:var(--muted);font-size:12px;text-align:center}
+    .checklist li{margin:8px 0}
+    .quote{border-left:3px solid var(--accent);padding:4px 12px;margin:8px 0;background:#0b1020;border-radius:6px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="title">
+        <h1>Rencana Kerja Code Review &amp; Perbaikan — be-dms</h1>
+        <div class="subtitle">Spring Boot 3.5.4 • Java 17 • MySQL • JWT</div>
+        <div class="kpi">
+          <span class="chip">Profil Pengujian: Thorough</span>
+          <span class="chip">Target Deploy: JAR</span>
+          <span class="chip">Public Endpoint: <code>/api/admin/roles/active</code></span>
+        </div>
+      </div>
+      <div class="badge">Status: Menunggu Persetujuan Eksekusi</div>
+    </header>
+
+    <section class="card">
+      <h2>1) Ringkasan Eksekutif</h2>
+      <p>Struktur proyek telah baik (controller → service → repository) dengan <i>exception handling</i> terpusat dan otentikasi JWT. Terdapat beberapa isu keamanan/konfigurasi prioritas yang harus diperbaiki sebelum melanjutkan, terutama terkait urutan validasi JWT, konsolidasi CORS, konsistensi properti, serta penguatan penanganan secret JWT dan packaging build.</p>
+      <div class="quote">Tujuan: meningkatkan keamanan, konsistensi konfigurasi, keandalan build, dan memastikan seluruh endpoint berfungsi benar lewat pengujian menyeluruh.</div>
+    </section>
+
+    <section class="card">
+      <h2>2) Ruang Lingkup</h2>
+      <ul class="list-condensed">
+        <li>Security: <code>SecurityConfig</code>, <code>JwtAuthenticationFilter</code>, konsolidasi CORS, penanganan 401/403.</li>
+        <li>Auth &amp; Token: <code>AuthController</code>, <code>AuthService</code>, <code>RefreshTokenService</code>, <code>JwtUtil</code>.</li>
+        <li>Repository &amp; Entity: validasi query dan pemetaan JPA (khususnya <code>UserRepository</code>).</li>
+        <li>Konfigurasi: properties/profiles, packaging Maven (JAR), dependensi.</li>
+        <li>Pengujian menyeluruh seluruh endpoint dan skenario error/edge-case.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>3) Daftar Perubahan Prioritas (Actionable)</h2>
+
+      <h3><span class="prio p0">P0</span> Keamanan &amp; Stabilitas</h3>
+      <ul>
+        <li><b>JwtAuthenticationFilter</b>: Validasi tanda tangan &amp; expiry dilakukan <i>sebelum</i> set <code>SecurityContext</code>. Hindari set auth jika token tidak valid/expired.</li>
+        <li><b>Konsolidasi CORS</b>: Satu sumber kebenaran di <code>SecurityConfig</code> dengan <code>@Value("${app.cors.allowed-origins}")</code>. Hapus <code>WebConfig</code> dan anotasi <code>@CrossOrigin</code> di controller (kecuali ada kebutuhan khusus).</li>
+        <li><b>Properties key</b>: Hilangkan spasi di awal kunci <code>spring.jpa.hibernate.ddl-auto</code> di <code>application.properties</code> dan <code>application-dev.properties</code>.</li>
+        <li><b>JWT Secret</b>: Gunakan Base64-decoded secret dan validasi panjang kunci (HS256 ≥ 256-bit) pada startup (fail-fast bila tidak memenuhi).</li>
+      </ul>
+
+      <h3><span class="prio p1">P1</span> Konsistensi &amp; Ketepatan</h3>
+      <ul>
+        <li><b>AuthController</b>: Tambahkan <code>@Valid</code> pada DTO, lepaskan <code>try/catch</code> umum agar ditangani <code>GlobalExceptionHandler</code> (status 401/403/400 sesuai kasus).</li>
+        <li><b>Packaging JAR</b>: Hapus <code>spring-boot-starter-tomcat</code> scope <code>provided</code> dan kelas <code>ServletInitializer</code> (WAR-related) untuk menghindari kebingungan.</li>
+        <li><b>UserRepository</b>: Perbaiki query agregasi (gunakan <code>u.userId</code> pada GROUP BY, pertimbangkan DTO projection).</li>
+        <li><b>Default Role</b>: Hindari magic ID <code>(short)2</code>; resolve role "OPERATOR" via <code>RoleRepository</code> terlebih dahulu.</li>
+        <li><b>Security EntryPoint</b>: Tambahkan <i>AuthenticationEntryPoint</i> dan <i>AccessDeniedHandler</i> agar respons JSON konsisten untuk 401/403.</li>
+      </ul>
+
+      <h3><span class="prio p2">P2</span> Perapihan</h3>
+      <ul>
+        <li>Hapus dependensi tidak terpakai: <code>spring-boot-starter-oauth2-resource-server</code> bila memang tidak digunakan.</li>
+        <li>Standarisasi anotasi validasi pada DTO dan tambahkan <code>@Validated</code> pada controller bila perlu.</li>
+        <li>Tambahkan unique index untuk <code>User.userName</code> &amp; <code>User.userEmail</code> pada level DB (selain cek di repository).</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>4) Rencana Implementasi (Bertahap)</h2>
+      <ol>
+        <li><b>Hardening JWT Filter (P0)</b>
+          <ul>
+            <li>File: <code>security/JwtAuthenticationFilter.java</code></li>
+            <li>Urutan: extract → parse+validate (signature, expiry) → loadUser → set auth.</li>
+            <li>Pastikan error parsing/expired tidak pernah menyetel auth.</li>
+          </ul>
+        </li>
+        <li><b>Konsolidasi CORS (P0)</b>
+          <ul>
+            <li>File: <code>config/SecurityConfig.java</code>, hapus <code>config/WebConfig.java</code>, hapus <code>@CrossOrigin</code> massal.</li>
+            <li>Baca <code>app.cors.allowed-origins</code> dari properties (CSV → List).</li>
+          </ul>
+        </li>
+        <li><b>Perbaiki Properti JPA (P0)</b>
+          <ul>
+            <li>File: <code>application.properties</code> &amp; <code>application-dev.properties</code></li>
+            <li>Hapus spasi di depan <code>spring.jpa.hibernate.ddl-auto</code>.</li>
+          </ul>
+        </li>
+        <li><b>Penguatan JwtUtil (P0)</b>
+          <ul>
+            <li>Gunakan <code>io.jsonwebtoken.io.Decoders.BASE64</code> dan validasi panjang kunci.</li>
+            <li>Dokumentasikan format secret di README.</li>
+          </ul>
+        </li>
+        <li><b>Revisi AuthController (P1)</b>
+          <ul>
+            <li>Tambah <code>@Valid</code> pada <code>LoginRequest</code>, <code>SignupRequest</code>, <code>TokenRefreshRequest</code>.</li>
+            <li>Delegasikan error ke <code>GlobalExceptionHandler</code>.</li>
+          </ul>
+        </li>
+        <li><b>Packaging JAR Bersih (P1)</b>
+          <ul>
+            <li>pom.xml: hapus starter-tomcat (provided);</li>
+            <li>Hapus <code>ServletInitializer.java</code>.</li>
+          </ul>
+        </li>
+        <li><b>Perbaikan Query Repo (P1)</b>
+          <ul>
+            <li>File: <code>repository/UserRepository.java</code></li>
+            <li>Perbaiki GROUP BY (gunakan <code>u.userId</code>), pertimbangkan DTO projection.</li>
+          </ul>
+        </li>
+        <li><b>Default Role via Nama (P1)</b>
+          <ul>
+            <li>File: <code>service/AuthService.java</code></li>
+            <li>Resolve role "OPERATOR" via repository; fallback aman bila tidak ada.</li>
+          </ul>
+        </li>
+        <li><b>EntryPoint &amp; AccessDenied (P1)</b>
+          <ul>
+            <li>Tambahkan bean untuk JSON 401/403 konsisten (pakai <code>ApiResponse</code>).</li>
+          </ul>
+        </li>
+        <li><b>Cleanup Opsional (P2)</b>
+          <ul>
+            <li>Hapus oauth2 resource server bila tidak dipakai; standarisasi validasi DTO.</li>
+          </ul>
+        </li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <h2>5) Rencana Pengujian Menyeluruh (Thorough)</h2>
+
+      <h3>5.1 Lingkungan</h3>
+      <ul>
+        <li>Profil: <code>dev</code> (env: <code>DATASOURCE_*</code>, <code>JWT_SECRET</code> [Base64], <code>JWT_EXPIRATION</code>, <code>JWT_REFRESH_EXPIRATION</code>, <code>CORS_ALLOWED_ORIGINS</code>).</li>
+        <li>DB: MySQL tersedia; migrasi skema sesuai entitas; <code>DataInitializer</code> membuat role ADMIN/OPERATOR.</li>
+      </ul>
+
+      <h3>5.2 Autentikasi &amp; Token</h3>
+      <ul>
+        <li>POST <code>/api/auth/signup</code>: sukses, duplikat username/email, roleId tidak ditemukan.</li>
+        <li>POST <code>/api/auth/signin</code>: sukses, password salah, user nonaktif.</li>
+        <li>POST <code>/api/auth/refreshtoken</code>: valid (rotasi), invalid, expired, reuse token lama.</li>
+      </ul>
+
+      <h3>5.3 Autorisasi</h3>
+      <ul>
+        <li>Publik: <code>/api/auth/**</code>, <code>/api/setup/**</code>, <code>/api/test/all</code>, <code>/api/admin/roles/active</code>.</li>
+        <li>ADMIN: <code>/api/admin/**</code>, <code>/api/test/admin</code>.</li>
+        <li>ADMIN/OPERATOR: <code>/api/operator/**</code>, <code>/api/test/operator</code>, dan endpoint domain terkait.</li>
+      </ul>
+
+      <h3>5.4 CORS</h3>
+      <ul>
+        <li>Preflight OPTIONS dari origin diizinkan vs tidak diizinkan (allowed methods/headers/credentials, maxAge).</li>
+        <li>Request ber-credential dari FE yang diizinkan.</li>
+      </ul>
+
+      <h3>5.5 Domain Endpoint (contoh)</h3>
+      <ul>
+        <li><b>Customer</b>: paging, filter status/cabang, search, upload CSV (valid/invalid), download CSV.</li>
+        <li><b>CustomerDoc</b>: get/patch/delete doc by custId (validasi DTO, existence checks).</li>
+        <li><b>CustomerStats</b>: agregasi status by filter.</li>
+        <li><b>Role</b>: CRUD, assign, public roles/active.</li>
+        <li><b>Schedule</b>: group operator by date/task, add/remove operator.</li>
+        <li><b>User</b>, <b>Task</b>: CRUD/list.</li>
+      </ul>
+
+      <h3>5.6 Error Handling</h3>
+      <ul>
+        <li><code>@Valid</code> → <code>MethodArgumentNotValidException</code>, <code>Bind/ConstraintViolation</code>.</li>
+        <li><code>DataIntegrityViolation</code>: duplicate, FK.</li>
+        <li><code>HttpMessageNotReadable</code>: JSON rusak.</li>
+        <li><code>MethodNotSupported</code>, <code>TypeMismatch</code>.</li>
+        <li>401/403 konsisten dalam format <code>ApiResponse</code>.</li>
+      </ul>
+
+      <h3>5.7 JWT Spesifik</h3>
+      <ul>
+        <li>Signature invalid, expiry, clock skew kecil, token expired tidak pernah menyetel auth.</li>
+      </ul>
+
+      <h3>5.8 Contoh Curl</h3>
+      <pre><code># Sign-in
+curl -X POST http://localhost:8080/api/auth/signin \
+  -H "Content-Type: application/json" \
+  -d '{"userEmail":"admin@site.com","userHashPassword":"password"}'
+
+# Public roles active
+curl http://localhost:8080/api/admin/roles/active
+
+# Preflight CORS example
+curl -X OPTIONS http://localhost:8080/api/auth/signin -i \
+  -H "Origin: http://localhost:5173" \
+  -H "Access-Control-Request-Method: POST" \
+  -H "Access-Control-Request-Headers: content-type,authorization"</code></pre>
+    </section>
+
+    <section class="card">
+      <h2>6) Kriteria Penerimaan (Acceptance Criteria)</h2>
+      <ul>
+        <li>Semua perubahan P0 &amp; P1 terimplementasi dan lolos pengujian menyeluruh.</li>
+        <li>401/403/4xx/5xx selalu dalam format <code>ApiResponse</code> yang konsisten.</li>
+        <li>CORS berfungsi konsisten sesuai daftar origin pada properties.</li>
+        <li>Build JAR bersih, aplikasi dapat berjalan di dev/prod sesuai profil.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>7) Risiko &amp; Mitigasi</h2>
+      <ul>
+        <li><b>Perubahan CORS</b>: potensi memutus integrasi FE → lakukan staging test multi-origin sebelum release.</li>
+        <li><b>JWT Secret</b>: salah format (non-Base64) → tambahkan validasi startup &amp; dokumentasi.</li>
+        <li><b>Repo Query</b>: perubahan GROUP BY → uji integrasi terkait laporan/operator.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>8) Rencana Rollback</h2>
+      <ul>
+        <li>Gunakan branch terpisah; PR dengan review. Rollback via revert commit di branch release.</li>
+        <li>Backup properti lingkungan sebelum mengubah format secret/token expiry.</li>
+      </ul>
+    </section>
+
+    <section class="card grid grid-2">
+      <div>
+        <h2>9) Estimasi Waktu</h2>
+        <ul>
+          <li>P0: 0.5–1 hari</li>
+          <li>P1: 0.5–1.5 hari</li>
+          <li>Pengujian menyeluruh: 1–2 hari</li>
+        </ul>
+      </div>
+      <div>
+        <h2>10) Dependensi</h2>
+        <ul>
+          <li>Akses DB dev, environment variables, Postman collection.</li>
+          <li>Daftar origin FE yang valid (CORS).</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>11) Checklist Eksekusi</h2>
+      <ul class="checklist">
+        <li>[ ] Perbaiki urutan validasi di <code>JwtAuthenticationFilter</code></li>
+        <li>[ ] Konsolidasi CORS ke <code>SecurityConfig</code>, hapus duplikasi</li>
+        <li>[ ] Rapikan properti JPA (hilangkan spasi kunci)</li>
+        <li>[ ] Perkuat <code>JwtUtil</code> (Base64 secret + panjang kunci)</li>
+        <li>[ ] Revisi <code>AuthController</code> untuk validasi &amp; handler global</li>
+        <li>[ ] Bersihkan packaging JAR &amp; hapus artefak WAR</li>
+        <li>[ ] Perbaiki query agregasi <code>UserRepository</code></li>
+        <li>[ ] Ganti default role via nama</li>
+        <li>[ ] Tambahkan EntryPoint &amp; AccessDeniedHandler</li>
+        <li>[ ] Pengujian menyeluruh (auth, authorization, CORS, domain, error, JWT)</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>12) Status &amp; Tindakan Lanjutan</h2>
+      <p>Saat ini <b>belum ada eksekusi perubahan kode</b>. Rencana ini menunggu persetujuan Anda untuk lanjut ke implementasi dan pengujian menyeluruh.</p>
+      <p>Setelah disetujui, pekerjaan akan dieksekusi berurutan sesuai prioritas (P0 → P1 → P2) dengan update progres per langkah.</p>
+    </section>
+
+    <footer>
+      Dokumen ini dibuat otomatis oleh BLACKBOXAI — Rencana Kerja Code Review &amp; Perbaikan be-dms.
+    </footer>
+  </div>
+</body>
+</html>
