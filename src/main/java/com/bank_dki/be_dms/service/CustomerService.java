@@ -173,29 +173,32 @@ public class CustomerService {
                         pageable
                 ).getContent();
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        PrintWriter writer = new PrintWriter(out);
+        try(ByteArrayOutputStream out = new ByteArrayOutputStream();) {
+            PrintWriter writer = new PrintWriter(out);
 
-        // Header
-        writer.println("NasabahId,SEQ Number,NasabahNama,NasabahCIF,NasabahAccount,StatusName,Operator,NasabahDeliveryDate");
+            // Header
+            writer.println("NasabahId,SEQ Number,NasabahNama,NasabahCIF,NasabahAccount,StatusName,Operator,NasabahDeliveryDate");
 
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        for (Customer c : customers) {
-            writer.printf("%s,%s,%s,%s,%s,%s,%s,%s%n",
-                    c.getCustId(),
-                    c.getCustSeqNumber(),
-                    c.getPrsnNama(),
-                    c.getCustCifNumber(),
-                    c.getCustNoRek(),
-                    c.getCustStatus(),
-                    c.getCustCreateBy(),
-                    c.getCustDeliverDate() != null ? c.getCustDeliverDate().format(dateFormatter) : ""
-            );
+            for (Customer c : customers) {
+                writer.printf("%s,%s,%s,%s,%s,%s,%s,%s%n",
+                        c.getCustId(),
+                        c.getCustSeqNumber(),
+                        c.getPrsnNama(),
+                        c.getCustCifNumber(),
+                        c.getCustNoRek(),
+                        c.getCustStatus(),
+                        c.getCustCreateBy(),
+                        c.getCustDeliverDate() != null ? c.getCustDeliverDate().format(dateFormatter) : ""
+                );
+            }
+
+            writer.flush();
+            return out.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
-        writer.flush();
-        return out.toByteArray();
     }
     
     public Customer updateCustomer(Short id, CustomerDTO customerDTO) {
