@@ -6,12 +6,14 @@ import com.bank_dki.be_dms.dto.CustomerDTO;
 import com.bank_dki.be_dms.dto.MessageResponse;
 import com.bank_dki.be_dms.service.CustomerService;
 import com.bank_dki.be_dms.util.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,7 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/customers")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*", maxAge = 3600)
+@Validated
 public class CustomerController {
     
     private final CustomerService customerService;
@@ -55,56 +57,50 @@ public class CustomerController {
     
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<CustomerDTO>> getAllCustomersIncludeDeleted() {
-        return ResponseEntity.ok(customerService.getAllCustomers());
+    public ResponseEntity<ApiResponse<List<CustomerDTO>>> getAllCustomersIncludeDeleted() {
+        List<CustomerDTO> customers = customerService.getAllCustomers();
+        ApiResponse<List<CustomerDTO>> response = ApiResponse.success("Success", customers);
+        return ResponseEntity.ok(response);
     }
     
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
-    public ResponseEntity<CustomerDTO> getCustomerById(@PathVariable Short id) {
+    public ResponseEntity<ApiResponse<CustomerDTO>> getCustomerById(@PathVariable Short id) {
         return customerService.getCustomerById(id)
-                .map(ResponseEntity::ok)
+                .map(customer -> ResponseEntity.ok(ApiResponse.success("Success", customer)))
                 .orElse(ResponseEntity.notFound().build());
     }
     
     @GetMapping("/cif/{cifNumber}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
-    public ResponseEntity<CustomerDTO> getCustomerByCifNumber(@PathVariable String cifNumber) {
+    public ResponseEntity<ApiResponse<CustomerDTO>> getCustomerByCifNumber(@PathVariable String cifNumber) {
         return customerService.getCustomerByCifNumber(cifNumber)
-                .map(ResponseEntity::ok)
+                .map(customer -> ResponseEntity.ok(ApiResponse.success("Success", customer)))
                 .orElse(ResponseEntity.notFound().build());
     }
     
     @GetMapping("/nik/{nik}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
-    public ResponseEntity<CustomerDTO> getCustomerByNik(@PathVariable String nik) {
+    public ResponseEntity<ApiResponse<CustomerDTO>> getCustomerByNik(@PathVariable String nik) {
         return customerService.getCustomerByNik(nik)
-                .map(ResponseEntity::ok)
+                .map(customer -> ResponseEntity.ok(ApiResponse.success("Success", customer)))
                 .orElse(ResponseEntity.notFound().build());
     }
     
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
-    public ResponseEntity<MessageResponse> createCustomer(@RequestBody CustomerDTO customerDTO) {
-        try {
-            customerService.createCustomer(customerDTO);
-            return ResponseEntity.ok(new MessageResponse("Customer created successfully!"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponse("Error: " + e.getMessage()));
-        }
+    public ResponseEntity<ApiResponse<Void>> createCustomer(@Valid @RequestBody CustomerDTO customerDTO) {
+        customerService.createCustomer(customerDTO);
+        ApiResponse<Void> response = ApiResponse.success("Customer created successfully!", null);
+        return ResponseEntity.ok(response);
     }
     
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
-    public ResponseEntity<MessageResponse> updateCustomer(@PathVariable Short id, @RequestBody CustomerDTO customerDTO) {
-        try {
-            customerService.updateCustomer(id, customerDTO);
-            return ResponseEntity.ok(new MessageResponse("Customer updated successfully!"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponse("Error: " + e.getMessage()));
-        }
+    public ResponseEntity<ApiResponse<Void>> updateCustomer(@PathVariable Short id, @Valid @RequestBody CustomerDTO customerDTO) {
+        customerService.updateCustomer(id, customerDTO);
+        ApiResponse<Void> response = ApiResponse.success("Customer updated successfully!", null);
+        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/register/{id}")
@@ -118,32 +114,34 @@ public class CustomerController {
     
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<MessageResponse> deleteCustomer(@PathVariable Short id) {
-        try {
-            customerService.deleteCustomer(id);
-            return ResponseEntity.ok(new MessageResponse("Customer deleted successfully!"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponse("Error: " + e.getMessage()));
-        }
+    public ResponseEntity<ApiResponse<Void>> deleteCustomer(@PathVariable Short id) {
+        customerService.deleteCustomer(id);
+        ApiResponse<Void> response = ApiResponse.success("Customer deleted successfully!", null);
+        return ResponseEntity.ok(response);
     }
     
     @GetMapping("/status/{status}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
-    public ResponseEntity<List<CustomerDTO>> getCustomersByStatus(@PathVariable String status) {
-        return ResponseEntity.ok(customerService.getCustomersByStatus(status));
+    public ResponseEntity<ApiResponse<List<CustomerDTO>>> getCustomersByStatus(@PathVariable String status) {
+        List<CustomerDTO> customers = customerService.getCustomersByStatus(status);
+        ApiResponse<List<CustomerDTO>> response = ApiResponse.success("Success", customers);
+        return ResponseEntity.ok(response);
     }
     
     @GetMapping("/cabang/{cabang}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
-    public ResponseEntity<List<CustomerDTO>> getCustomersByCabang(@PathVariable String cabang) {
-        return ResponseEntity.ok(customerService.getCustomersByCabang(cabang));
+    public ResponseEntity<ApiResponse<List<CustomerDTO>>> getCustomersByCabang(@PathVariable String cabang) {
+        List<CustomerDTO> customers = customerService.getCustomersByCabang(cabang);
+        ApiResponse<List<CustomerDTO>> response = ApiResponse.success("Success", customers);
+        return ResponseEntity.ok(response);
     }
     
     @GetMapping("/search")
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
-    public ResponseEntity<List<CustomerDTO>> searchCustomersByName(@RequestParam String nama) {
-        return ResponseEntity.ok(customerService.searchCustomersByName(nama));
+    public ResponseEntity<ApiResponse<List<CustomerDTO>>> searchCustomersByName(@RequestParam String nama) {
+        List<CustomerDTO> customers = customerService.searchCustomersByName(nama);
+        ApiResponse<List<CustomerDTO>> response = ApiResponse.success("Success", customers);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/upload")

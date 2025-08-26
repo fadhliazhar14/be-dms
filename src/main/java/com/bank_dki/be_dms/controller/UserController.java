@@ -5,9 +5,11 @@ import com.bank_dki.be_dms.dto.PageResponseDTO;
 import com.bank_dki.be_dms.dto.*;
 import com.bank_dki.be_dms.service.UserService;
 import com.bank_dki.be_dms.util.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,21 +17,25 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*", maxAge = 3600)
+@Validated
 public class UserController {
     
     private final UserService userService;
     
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserDTO>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    public ResponseEntity<ApiResponse<List<UserDTO>>> getAllUsers() {
+        List<UserDTO> users = userService.getAllUsers();
+        ApiResponse<List<UserDTO>> response = ApiResponse.success("Success", users);
+        return ResponseEntity.ok(response);
     }
     
     @GetMapping("/active")
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
-    public ResponseEntity<List<UserDTO>> getAllActiveUsers() {
-        return ResponseEntity.ok(userService.getAllActiveUsers());
+    public ResponseEntity<ApiResponse<List<UserDTO>>> getAllActiveUsers() {
+        List<UserDTO> users = userService.getAllActiveUsers();
+        ApiResponse<List<UserDTO>> response = ApiResponse.success("Success", users);
+        return ResponseEntity.ok(response);
     }
     
     @GetMapping("/{id}")
@@ -43,70 +49,50 @@ public class UserController {
     
     @GetMapping("/email/{email}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserDTO> getUserByEmail(@PathVariable String email) {
+    public ResponseEntity<ApiResponse<UserDTO>> getUserByEmail(@PathVariable String email) {
         return userService.getUserByEmail(email)
-                .map(ResponseEntity::ok)
+                .map(user -> ResponseEntity.ok(ApiResponse.success("Success", user)))
                 .orElse(ResponseEntity.notFound().build());
     }
     
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<MessageResponse> createUser(@RequestBody UserCreateRequest request) {
-        try {
-            userService.createUser(request);
-            return ResponseEntity.ok(new MessageResponse("User created successfully!"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponse("Error: " + e.getMessage()));
-        }
+    public ResponseEntity<ApiResponse<Void>> createUser(@Valid @RequestBody UserCreateRequest request) {
+        userService.createUser(request);
+        ApiResponse<Void> response = ApiResponse.success("User created successfully!", null);
+        return ResponseEntity.ok(response);
     }
     
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<MessageResponse> updateUser(@PathVariable Short id, @RequestBody UserUpdateRequest request) {
-        try {
-            userService.updateUser(id, request);
-            return ResponseEntity.ok(new MessageResponse("User updated successfully!"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponse("Error: " + e.getMessage()));
-        }
+    public ResponseEntity<ApiResponse<Void>> updateUser(@PathVariable Short id, @Valid @RequestBody UserUpdateRequest request) {
+        userService.updateUser(id, request);
+        ApiResponse<Void> response = ApiResponse.success("User updated successfully!", null);
+        return ResponseEntity.ok(response);
     }
     
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<MessageResponse> deleteUser(@PathVariable Short id) {
-        try {
-            userService.deleteUser(id);
-            return ResponseEntity.ok(new MessageResponse("User deleted successfully!"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponse("Error: " + e.getMessage()));
-        }
+    public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Short id) {
+        userService.deleteUser(id);
+        ApiResponse<Void> response = ApiResponse.success("User deleted successfully!", null);
+        return ResponseEntity.ok(response);
     }
     
     @PatchMapping("/{id}/deactivate")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<MessageResponse> deactivateUser(@PathVariable Short id) {
-        try {
-            userService.deactivateUser(id);
-            return ResponseEntity.ok(new MessageResponse("User deactivated successfully!"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponse("Error: " + e.getMessage()));
-        }
+    public ResponseEntity<ApiResponse<Void>> deactivateUser(@PathVariable Short id) {
+        userService.deactivateUser(id);
+        ApiResponse<Void> response = ApiResponse.success("User deactivated successfully!", null);
+        return ResponseEntity.ok(response);
     }
     
     @PatchMapping("/{id}/activate")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<MessageResponse> activateUser(@PathVariable Short id) {
-        try {
-            userService.activateUser(id);
-            return ResponseEntity.ok(new MessageResponse("User activated successfully!"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponse("Error: " + e.getMessage()));
-        }
+    public ResponseEntity<ApiResponse<Void>> activateUser(@PathVariable Short id) {
+        userService.activateUser(id);
+        ApiResponse<Void> response = ApiResponse.success("User activated successfully!", null);
+        return ResponseEntity.ok(response);
     }
     
     @GetMapping("/role/{roleId}")

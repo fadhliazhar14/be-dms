@@ -1,7 +1,9 @@
 package com.bank_dki.be_dms.util;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -21,8 +23,34 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private Long expiration;
     
+    private Key signingKey;
+    
+    @PostConstruct
+    public void init() {
+        try {
+            // Decode Base64-encoded secret
+            byte[] keyBytes = Decoders.BASE64.decode(secret);
+            
+            // Validate key length (HS256 requires at least 256 bits = 32 bytes)
+            if (keyBytes.length < 32) {
+                throw new IllegalStateException(
+                        String.format("JWT secret key is too short. Expected at least 32 bytes (256 bits), got %d bytes. "
+                                + "Please provide a Base64-encoded 32-byte key.", keyBytes.length)
+                );
+            }
+            
+            // Create signing key
+            this.signingKey = Keys.hmacShaKeyFor(keyBytes);
+            
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException(
+                    "JWT secret must be a valid Base64-encoded string. Please check your jwt.secret configuration.", e
+            );
+        }
+    }
+    
     private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
+        return signingKey;
     }
     
     public String extractUsername(String token) {

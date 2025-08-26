@@ -1,7 +1,10 @@
 package com.bank_dki.be_dms.config;
 
+import com.bank_dki.be_dms.security.CustomAccessDeniedHandler;
+import com.bank_dki.be_dms.security.CustomAuthenticationEntryPoint;
 import com.bank_dki.be_dms.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -33,6 +36,11 @@ public class SecurityConfig {
     
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserDetailsService userDetailsService;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    
+    @Value("${app.cors.allowed-origins}")
+    private String allowedOrigins;
     
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -56,15 +64,23 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> {})
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .accessDeniedHandler(customAccessDeniedHandler)
+                )
                 .authorizeHttpRequests(authz -> authz
+                        // Public endpoints - no authentication required
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/setup/**").permitAll()
                         .requestMatchers("/api/test/all").permitAll()
-                        .requestMatchers("/api/admin/roles/active").permitAll()
+                        .requestMatchers("/api/roles/active").permitAll() // Only active roles endpoint is public
+                        .requestMatchers("/api/debug/**").permitAll() // Debug endpoints for troubleshooting
+                        // Protected endpoints - authentication required
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/operator/**").hasAnyRole("ADMIN", "OPERATOR")
                         .requestMatchers("/api/test/operator").hasAnyRole("ADMIN", "OPERATOR")
                         .requestMatchers("/api/test/admin").hasRole("ADMIN")
+                        // All other endpoints require authentication
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -77,10 +93,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Read from application properties for consistency
-        String corsOrigins = System.getProperty("app.cors.allowed-origins",
-                "http://localhost:3000,http://localhost:5173,https://dev.osacademy.net,https://fe-dms-tau.vercel.app");
-        configuration.setAllowedOrigins(Arrays.asList(corsOrigins.split(",")));
+        // Use property value injected from application.properties
+        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("Content-Type", "Authorization", "X-Requested-With"));

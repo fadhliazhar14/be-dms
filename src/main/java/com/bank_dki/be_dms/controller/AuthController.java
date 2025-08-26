@@ -5,17 +5,19 @@ import com.bank_dki.be_dms.exception.BusinessValidationException;
 import com.bank_dki.be_dms.service.AuthService;
 import com.bank_dki.be_dms.service.RefreshTokenService;
 import com.bank_dki.be_dms.util.JwtUtil;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*", maxAge = 3600)
+@Validated
 public class AuthController {
     
     private final AuthService authService;
@@ -23,32 +25,19 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     
     @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
-        try {
-            JwtResponse jwtResponse = authService.authenticateUser(loginRequest);
-            return ResponseEntity.ok(jwtResponse);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponse("Error: " + e.getMessage()));
-        }
+    public ResponseEntity<JwtResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+        JwtResponse jwtResponse = authService.authenticateUser(loginRequest);
+        return ResponseEntity.ok(jwtResponse);
     }
     
     @PostMapping("/signup")
-    public ResponseEntity<MessageResponse> registerUser(@RequestBody SignupRequest signUpRequest) {
-        try {
-            MessageResponse response = authService.registerUser(signUpRequest);
-            if (response.getMessage().startsWith("Error:")) {
-                return ResponseEntity.badRequest().body(response);
-            }
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponse("Error: " + e.getMessage()));
-        }
+    public ResponseEntity<MessageResponse> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+        MessageResponse response = authService.registerUser(signUpRequest);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/refreshtoken")
-    public ResponseEntity<?> refreshToken(@RequestBody TokenRefreshRequest request) {
+    public ResponseEntity<TokenRefreshResponse> refreshToken(@Valid @RequestBody TokenRefreshRequest request) {
         String requestRefreshToken = request.getRefreshToken();
 
         return refreshTokenService.findByToken(requestRefreshToken)

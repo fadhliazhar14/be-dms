@@ -5,7 +5,9 @@ import com.bank_dki.be_dms.dto.LoginRequest;
 import com.bank_dki.be_dms.dto.MessageResponse;
 import com.bank_dki.be_dms.dto.SignupRequest;
 import com.bank_dki.be_dms.entity.RefreshToken;
+import com.bank_dki.be_dms.entity.Role;
 import com.bank_dki.be_dms.entity.User;
+import com.bank_dki.be_dms.exception.BusinessValidationException;
 import com.bank_dki.be_dms.repository.RoleRepository;
 import com.bank_dki.be_dms.repository.UserRepository;
 import com.bank_dki.be_dms.util.JwtUtil;
@@ -72,17 +74,25 @@ public class AuthService {
             return new MessageResponse("Error: Email is already in use!");
         }
         
-        // Validate if role exists
+        // Determine role ID
+        Short roleId;
         if (signUpRequest.getRoleId() != null) {
+            // Validate if role exists
             roleRepository.findById(signUpRequest.getRoleId())
                     .orElseThrow(() -> new RuntimeException("Error: Role with ID " + signUpRequest.getRoleId() + " is not found."));
+            roleId = signUpRequest.getRoleId();
+        } else {
+            // Default to OPERATOR role
+            Role operatorRole = roleRepository.findByRoleName("OPERATOR")
+                    .orElseThrow(() -> new BusinessValidationException("Error: Default OPERATOR role not found. Please ensure roles are initialized properly."));
+            roleId = operatorRole.getRoleId();
         }
         
         User user = new User();
         user.setUserName(signUpRequest.getUserName());
         user.setUserEmail(signUpRequest.getUserEmail());
         user.setUserHashPassword(passwordEncoder.encode(signUpRequest.getUserHashPassword()));
-        user.setRoleId(signUpRequest.getRoleId() != null ? signUpRequest.getRoleId() : (short) 2); // Default to OPERATOR role
+        user.setRoleId(roleId);
         user.setUserTglLahir(signUpRequest.getUserTglLahir());
         user.setUserJabatan(signUpRequest.getUserJabatan());
         user.setUserTempatLahir(signUpRequest.getUserTempatLahir());

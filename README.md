@@ -53,14 +53,31 @@ spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
 
 # JWT Configuration
-jwt.secret=mySecretKey123456789012345678901234567890
-jwt.expiration=86400000
+jwt.secret=${JWT_SECRET}
+jwt.expiration=${JWT_EXPIRATION:3600000}
+jwt.refresh-expiration=${JWT_REFRESH_EXPIRATION:604800000}
 ```
 
 ### Security Configuration
-- JWT Secret key untuk signing tokens
-- Token expiration: 24 jam (86400000 ms)
-- CORS enabled untuk semua origins
+- **JWT Secret key**: Harus berupa Base64-encoded 32-byte key (256-bit) untuk HS256
+- **Token expiration**: Default 1 jam (3600000 ms)
+- **Refresh token expiration**: Default 7 hari (604800000 ms)
+- **CORS**: Dikonfigurasi melalui property `app.cors.allowed-origins`
+
+#### JWT Secret Key Requirements
+⚠️ **IMPORTANT**: JWT secret harus berupa Base64-encoded string dengan panjang minimum 32 byte (256-bit).
+
+**Generate secure Base64 key:**
+```bash
+# Generate 32 random bytes and encode to Base64
+openssl rand -base64 32
+```
+
+**Example:**
+```bash
+# Output example: dGhpcyBpcyBhIHNlY3VyZSBqd3Qgc2VjcmV0IGZvciAyNTYgYml0
+export JWT_SECRET="dGhpcyBpcyBhIHNlY3VyZSBqd3Qgc2VjcmV0IGZvciAyNTYgYml0"
+```
 
 ## 📊 Database Schema
 
@@ -150,11 +167,21 @@ src/main/java/com/bank_dki/be_dms/
 - **Method-level Security**: Menggunakan `@PreAuthorize` untuk role-based access
 - **Password Encryption**: BCrypt hashing untuk password
 
-## 📚 API Documentation
+## 📚 Documentation
 
-### Base URL
+### 🚀 **[Quick Navigation](DOCS-NAVIGATION.md)** | 📖 **[Documentation Hub (HTML)](docs/index.html)** | 📋 **[Documentation Hub (Markdown)](docs/README.md)**
+
+All project documentation is now organized in the `docs/` folder for easy access:
+
+- **[🏠 Documentation Hub](docs/README.md)** - Main documentation portal with organized categories
+- **[🚀 Quick Start Guide](docs/guide/QUICK_START_GUIDE.md)** - Get up and running in minutes  
+- **[📡 API Documentation](docs/api/API_DOCUMENTATION.md)** - Complete API endpoint documentation
+- **[🔍 Troubleshooting](docs/troubleshooting/JWT-TROUBLESHOOTING.md)** - Common issues and solutions
+- **[🔧 Technical Docs](docs/technical/)** - In-depth implementation details
+
+### Base URL for API
 ```
-http://localhost:8080/api
+http://localhost:9000/api
 ```
 
 ### Authentication Endpoints

@@ -47,7 +47,7 @@ public interface UserRepository extends JpaRepository<User, Short> {
     LEFT JOIN Customer c ON c.custCreateBy = u.userName
     WHERE u.roleId = :roleId
       AND (:search IS NULL OR :search = '' OR LOWER(u.userName) LIKE LOWER(CONCAT('%', :search, '%')))
-    GROUP BY u.id, u.userName, u.roleId
+    GROUP BY u.userId
 """)
     Page<Object[]> findOperatorsWithCustCount(
             @Param("roleId") Short roleId,

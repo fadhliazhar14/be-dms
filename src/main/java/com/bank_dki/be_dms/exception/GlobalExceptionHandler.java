@@ -7,9 +7,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.AuthenticationException;
+// Removed security exception imports - handled by Spring Security handlers
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -157,32 +155,24 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle authentication exceptions
+     * Handle method-level authorization denied exceptions (Spring Security 6.x)
+     * This is different from HTTP-level access denied and occurs at @PreAuthorize level
      */
-    @ExceptionHandler({AuthenticationException.class, BadCredentialsException.class})
-    public ResponseEntity<ApiResponse<?>> handleAuthenticationException(
-            AuthenticationException ex, HttpServletRequest request) {
+    @ExceptionHandler(org.springframework.security.authorization.AuthorizationDeniedException.class)
+    public ResponseEntity<ApiResponse<?>> handleMethodAuthorizationDenied(
+            org.springframework.security.authorization.AuthorizationDeniedException ex, HttpServletRequest request) {
 
-        log.warn("Authentication failed on path: {} - Error: {}",
-                request.getRequestURI(), ex.getMessage());
-
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), "Authentication failed", null));
-    }
-
-    /**
-     * Handle access denied exceptions
-     */
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ApiResponse<?>> handleAccessDenied(
-            AccessDeniedException ex, HttpServletRequest request) {
-
-        log.warn("Access denied on path: {} - Error: {}",
+        log.warn("Method-level authorization denied on path: {} - Error: {}",
                 request.getRequestURI(), ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(ApiResponse.error(HttpStatus.FORBIDDEN.value(), "Access denied", null));
+                .body(ApiResponse.error(HttpStatus.FORBIDDEN.value(), 
+                      "Access denied. You do not have sufficient permissions to access this resource.", null));
     }
+
+    // HTTP-level authentication exceptions are handled by CustomAuthenticationEntryPoint in Spring Security
+    // HTTP-level access denied exceptions are handled by CustomAccessDeniedHandler in Spring Security
+    // Method-level authorization exceptions are handled above
 
     /**
      * Handle method argument type mismatch

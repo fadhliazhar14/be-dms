@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BE-DMS Documentation Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .quick-start {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 40px;
+            border-left: 5px solid #667eea;
+        }
+
+        .quick-start h2 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .quick-link {
+            background: white;
+            border: 2px solid #e1e5f2;
+            border-radius: 10px;
+            padding: 25px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .quick-link:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-color: #667eea;
+        }
+
+        .quick-link h3 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .quick-link p {
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .categories {
+            margin-top: 40px;
+        }
+
+        .category {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .category h2 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            font-size: 1.6em;
+            display: flex;
+            align-items: center;
+        }
+
+        .category-icon {
+            font-size: 1.2em;
+            margin-right: 10px;
+        }
+
+        .doc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .doc-item {
+            background: white;
+            border: 1px solid #e1e5f2;
+            border-radius: 8px;
+            padding: 20px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.3s ease;
+        }
+
+        .doc-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-color: #667eea;
+        }
+
+        .doc-item h4 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+        }
+
+        .doc-item p {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .role-navigation {
+            background: #fff8f0;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 40px 0;
+            border-left: 5px solid #ff9500;
+        }
+
+        .role-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .role-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #ffd699;
+        }
+
+        .role-card h4 {
+            color: #cc7a00;
+            margin-bottom: 15px;
+        }
+
+        .role-card ol {
+            padding-left: 20px;
+        }
+
+        .role-card li {
+            margin-bottom: 5px;
+        }
+
+        .role-card a {
+            color: #1e3c72;
+            text-decoration: none;
+        }
+
+        .role-card a:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            background: #1e3c72;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .footer a {
+            color: #87ceeb;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            font-size: 0.8em;
+            padding: 4px 8px;
+            border-radius: 12px;
+            margin-left: 10px;
+        }
+
+        .recent-updates {
+            background: #f0f8f0;
+            border-radius: 10px;
+            padding: 30px;
+            margin-top: 40px;
+            border-left: 5px solid #28a745;
+        }
+
+        .update-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #e8f5e8;
+        }
+
+        .update-item:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .quick-links {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏦 BE-DMS Documentation Hub</h1>
+            <p>Bank DKI Document Management System - Complete Documentation Portal</p>
+        </div>
+
+        <div class="content">
+            <!-- Quick Start Section -->
+            <div class="quick-start">
+                <h2>🚀 Quick Start</h2>
+                <p>New to the project? Start here to get up and running quickly!</p>
+                
+                <div class="quick-links">
+                    <a href="guide/QUICK_START_GUIDE.md" class="quick-link">
+                        <h3>📖 Quick Start Guide</h3>
+                        <p>Get the backend running in minutes with step-by-step instructions</p>
+                    </a>
+                    <a href="../README.md" class="quick-link">
+                        <h3>🔧 Project Setup</h3>
+                        <p>Basic project information, installation, and configuration</p>
+                    </a>
+                    <a href="api/API_DOCUMENTATION.md" class="quick-link">
+                        <h3>📡 API Reference</h3>
+                        <p>Complete API endpoint documentation and examples</p>
+                    </a>
+                    <a href="troubleshooting/JWT-TROUBLESHOOTING.md" class="quick-link">
+                        <h3>🔍 Troubleshooting</h3>
+                        <p>Common issues and solutions for JWT and authentication</p>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Role-based Navigation -->
+            <div class="role-navigation">
+                <h2>🎯 Quick Navigation by Role</h2>
+                <p>Find documentation relevant to your role:</p>
+                
+                <div class="role-grid">
+                    <div class="role-card">
+                        <h4>👨‍💻 Frontend Developers</h4>
+                        <ol>
+                            <li><a href="api/API_DOCUMENTATION.md">API Documentation</a></li>
+                            <li><a href="troubleshooting/JWT-TROUBLESHOOTING.md">JWT Troubleshooting</a></li>
+                            <li><a href="guide/QUICK_START_GUIDE.md">Quick Start Guide</a></li>
+                        </ol>
+                    </div>
+                    
+                    <div class="role-card">
+                        <h4>⚙️ Backend Developers</h4>
+                        <ol>
+                            <li><a href="guide/QUICK_START_GUIDE.md">Quick Start Guide</a></li>
+                            <li><a href="technical/">Technical Documentation</a></li>
+                            <li><a href="technical/EXCEPTION-HANDLER-RESOLUTION.md">Exception Handling</a></li>
+                        </ol>
+                    </div>
+                    
+                    <div class="role-card">
+                        <h4>🚀 DevOps/System Admin</h4>
+                        <ol>
+                            <li><a href="guide/QUICK_START_GUIDE.md">Deployment Setup</a></li>
+                            <li><a href="troubleshooting/JWT-TROUBLESHOOTING.md">Security Config</a></li>
+                            <li><a href="project/rencana-kerja.html">Infrastructure Plan</a></li>
+                        </ol>
+                    </div>
+                    
+                    <div class="role-card">
+                        <h4>📊 Project Managers</h4>
+                        <ol>
+                            <li><a href="project/rencana-kerja.html">Work Plan & Timeline</a></li>
+                            <li><a href="api/documentation.html">Feature Overview</a></li>
+                            <li><a href="technical/">Technical Decisions</a></li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documentation Categories -->
+            <div class="categories">
+                <div class="category">
+                    <h2><span class="category-icon">📖</span>User Guides</h2>
+                    <div class="doc-grid">
+                        <a href="guide/QUICK_START_GUIDE.md" class="doc-item">
+                            <h4>Quick Start Guide</h4>
+                            <p>Step-by-step setup and first run instructions for new developers</p>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="category">
+                    <h2><span class="category-icon">🔧</span>Technical Documentation</h2>
+                    <div class="doc-grid">
+                        <a href="technical/EXCEPTION-HANDLER-RESOLUTION.md" class="doc-item">
+                            <h4>Exception Handler Resolution</h4>
+                            <p>Security exception handling conflicts and solutions between Spring Security and Spring MVC</p>
+                        </a>
+                        <a href="technical/SPRING-SECURITY-6-EXCEPTION-HANDLING.md" class="doc-item">
+                            <h4>Spring Security 6.x Exception Handling</h4>
+                            <p>Modern Spring Security exception management and new authorization types</p>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="category">
+                    <h2><span class="category-icon">🔍</span>Troubleshooting</h2>
+                    <div class="doc-grid">
+                        <a href="troubleshooting/JWT-TROUBLESHOOTING.md" class="doc-item">
+                            <h4>JWT Token Troubleshooting</h4>
+                            <p>Debug JWT authentication issues with comprehensive tools and solutions</p>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="category">
+                    <h2><span class="category-icon">📡</span>API Documentation</h2>
+                    <div class="doc-grid">
+                        <a href="api/API_DOCUMENTATION.md" class="doc-item">
+                            <h4>API Documentation (Markdown)</h4>
+                            <p>Complete API reference with endpoints, parameters, and examples</p>
+                        </a>
+                        <a href="api/documentation.html" class="doc-item">
+                            <h4>API Documentation (HTML) <span class="badge">Interactive</span></h4>
+                            <p>Rich interactive API documentation with live examples</p>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="category">
+                    <h2><span class="category-icon">📝</span>Project Information</h2>
+                    <div class="doc-grid">
+                        <a href="project/rencana-kerja.html" class="doc-item">
+                            <h4>Rencana Kerja (Work Plan)</h4>
+                            <p>Comprehensive project work plan and implementation timeline details</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Updates -->
+            <div class="recent-updates">
+                <h2>📈 Recent Updates</h2>
+                <div class="update-item">
+                    <strong>✅ Security Enhancement</strong> - Resolved exception handler conflicts between Spring Security and Spring MVC
+                </div>
+                <div class="update-item">
+                    <strong>✅ JWT Debugging</strong> - Added comprehensive JWT troubleshooting tools and documentation
+                </div>
+                <div class="update-item">
+                    <strong>✅ Controller Standardization</strong> - Implemented consistent ApiResponse format across all endpoints
+                </div>
+                <div class="update-item">
+                    <strong>✅ Spring Security 6.x</strong> - Updated to handle new authorization exception types
+                </div>
+                <div class="update-item">
+                    <strong>✅ Documentation Reorganization</strong> - Structured documentation into logical categories
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>
+                <strong>BE-DMS Documentation</strong> - Last updated: August 26, 2025<br>
+                Maintained by the BE-DMS development team | 
+                <a href="../README.md">Main Project README</a> | 
+                <a href="README.md">Documentation README</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
