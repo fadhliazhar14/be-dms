@@ -1,4 +1,4 @@
-nano Dockerfile# Multi-stage Dockerfile
+# Multi-stage Dockerfile
 # Stage 1: Build stage - Maven + JDK
 FROM maven:3.9.3-eclipse-temurin-17 AS build
 WORKDIR /app
