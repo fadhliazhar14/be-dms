@@ -1,18 +1,16 @@
 package com.bank_dki.be_dms.service;
 
-import com.bank_dki.be_dms.CustomerStatus;
+import com.bank_dki.be_dms.model.CustomerStatus;
 import com.bank_dki.be_dms.dto.PageRequestDTO;
 import com.bank_dki.be_dms.dto.PageResponseDTO;
 import com.bank_dki.be_dms.dto.CustomerDTO;
 import com.bank_dki.be_dms.entity.Customer;
 import com.bank_dki.be_dms.entity.Nomor;
-import com.bank_dki.be_dms.entity.Task;
 import com.bank_dki.be_dms.entity.User;
 import com.bank_dki.be_dms.exception.BusinessValidationException;
 import com.bank_dki.be_dms.exception.ResourceNotFoundException;
 import com.bank_dki.be_dms.repository.CustomerRepository;
 import com.bank_dki.be_dms.repository.NomorRepository;
-import com.bank_dki.be_dms.repository.TaskRepository;
 import com.bank_dki.be_dms.repository.UserRepository;
 import com.bank_dki.be_dms.util.CurrentUserUtils;
 import com.bank_dki.be_dms.util.PageUtil;
@@ -120,8 +118,6 @@ public class CustomerService {
 
     @Transactional
     public void saveCustomersFromCsv(MultipartFile file) {
-        String currentUploaderUsername = currentUserUtils.getCurrentUsername();
-        String CUST_STATUS_DELIVER = "Deliver";
 
         try (Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             if (file.isEmpty()) {
@@ -154,8 +150,8 @@ public class CustomerService {
                 customer.setPrsnNama(record.get("Nama"));
                 customer.setCustCifNumber(record.get("CIF Number"));
                 customer.setCustNoRek(record.get("Account Number"));
-                customer.setCustCreateBy(currentUploaderUsername);
-                customer.setCustStatus(CUST_STATUS_DELIVER);
+                customer.setCustCreateBy(getFormattedUsername());
+                customer.setCustStatus(CustomerStatus.REGISTER.getLabel());
                 customer.setCustAging("0");
                 customer.setCustDeliverDate(LocalDate.now());
                 customer.setCustIsDeleted(false);
@@ -174,10 +170,10 @@ public class CustomerService {
         boolean isAdmin = currentUserUtils.hasRole("ROLE_ADMIN");
         Pageable pageable = PageUtil.createPageable(pageRequest);
 
-        List<Customer> customers = isAdmin ? customerRepository.findAll() :
+        List<Customer> customers =
                 customerRepository.findAllWithSearchAndDateRange(
                         username,
-                        false,
+                        isAdmin,
                         pageRequest.getSearch(),
                         pageRequest.getDateFrom(),
                         pageRequest.getDateTo(),
@@ -248,7 +244,7 @@ public class CustomerService {
 
         customer.setCustSeqNumber(custSeqNumber);
         customer.setCustStatus(CustomerStatus.REGISTER.getLabel());
-        customer.setCustUpdateBy(currentUserUtils.getCurrentUsername());
+        customer.setCustUpdateBy(getFormattedUsername());
         customerRepository.save(customer);
     }
 
@@ -257,7 +253,7 @@ public class CustomerService {
                 .orElseThrow(() -> new BusinessValidationException("Customer not found"));
 
         customer.setCustStatus(CustomerStatus.PENGKINIAN.getLabel());
-        customer.setCustUpdateBy(currentUserUtils.getCurrentUsername());
+        customer.setCustUpdateBy(getFormattedUsername());
         customerRepository.save(customer);
     }
 
@@ -266,7 +262,7 @@ public class CustomerService {
                 .orElseThrow(() -> new BusinessValidationException("Customer not found"));
 
         customer.setCustStatus(CustomerStatus.PENGKAITAN.getLabel());
-        customer.setCustUpdateBy(currentUserUtils.getCurrentUsername());
+        customer.setCustUpdateBy(getFormattedUsername());
         customerRepository.save(customer);
     }
     
@@ -492,5 +488,12 @@ public class CustomerService {
         User currentUser = userRepository.findByUserName(currentUserUtils.getCurrentUsername()).orElse(null);
         String currentJobCode = currentUser != null ? currentUser.getUserJobCode() : "WI000";
         return  currentJobCode + "/" + formattedSeqDeliverDate + "/" + formattedSeqNumber;
+    }
+
+    private String getFormattedUsername () {
+        User currentUser = userRepository.findByUserName(currentUserUtils.getCurrentUsername()).orElse(null);
+        return currentUser != null ?
+                currentUser.getUserName() + " - " + currentUser.getUserJobCode() :
+                "null";
     }
 }

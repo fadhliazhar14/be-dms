@@ -1,15 +1,14 @@
-package com.bank_dki.be_dms;
+package com.bank_dki.be_dms.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @AllArgsConstructor
 public enum CustomerStatus {
-    SCANNING("Scanning"),
+    DELIVER("Deliver"),
     REGISTER("Register"),
+    SCANNING("Scanning"),
     PENGKINIAN("Pengkinian"),
     PENGKAITAN("Pengkaitan");
 
