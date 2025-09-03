@@ -251,8 +251,8 @@ public class CustomerService {
 
         LocalDate deliverDate = customer.getCustDeliverDate();
         String formattedSeqDeliverDate = deliverDate.format(DateTimeFormatter.ofPattern("yyyy/MM"));
-        String formattedSeqNumber = String.format("%04d", nextNumber);
-        String custSeqNumber = "WI001/" + formattedSeqDeliverDate + "/" + formattedSeqNumber;
+        String formattedSeqNumber = String.format("%06d", nextNumber);
+        String custSeqNumber = currentUserUtils.getCurrentUsername() + "/" + formattedSeqDeliverDate + "/" + formattedSeqNumber;
 
         customer.setCustSeqNumber(custSeqNumber);
         customer.setCustStatus(CustomerStatus.REGISTER.getLabel());
@@ -265,6 +265,15 @@ public class CustomerService {
                 .orElseThrow(() -> new BusinessValidationException("Customer not found"));
 
         customer.setCustStatus(CustomerStatus.PENGKINIAN.getLabel());
+        customer.setCustUpdateBy(currentUserUtils.getCurrentUsername());
+        customerRepository.save(customer);
+    }
+
+    public void updateCustomerStatusPengkaitan(Short id) {
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new BusinessValidationException("Customer not found"));
+
+        customer.setCustStatus(CustomerStatus.PENGKAITAN.getLabel());
         customer.setCustUpdateBy(currentUserUtils.getCurrentUsername());
         customerRepository.save(customer);
     }

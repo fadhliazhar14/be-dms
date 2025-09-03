@@ -129,6 +129,15 @@ public class CustomerController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PatchMapping("/pengkaitan/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
+    public ResponseEntity<ApiResponse<Void>> updateCustomerStatusPengkaitan(@PathVariable Short id) {
+        customerService.updateCustomerStatusPengkaitan(id);
+        ApiResponse<Void> response = ApiResponse.success("Customer status has been successfully updated : Pengkaitan", null);
+
+        return ResponseEntity.ok(response);
+    }
     
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
