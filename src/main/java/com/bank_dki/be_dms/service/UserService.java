@@ -93,7 +93,12 @@ public class UserService {
         user.setUserJabatan(request.getUserJabatan());
         user.setUserTempatLahir(request.getUserTempatLahir());
         user.setUserIsActive(request.getUserIsActive());
-        
+
+        userRepository.save(user);
+
+        String formattedJobCode = String.format("%03d", user.getUserId());
+        user.setUserJobCode("WI" + formattedJobCode);
+
         return userRepository.save(user);
     }
     
