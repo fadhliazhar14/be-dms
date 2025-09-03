@@ -23,6 +23,9 @@ public class User {
     
     @Column(name = "UserName", length = 100, nullable = true)
     private String userName;
+
+    @Column(name = "userJobCode", length = 100, nullable = true)
+    private String userJobCode;
     
     @Column(name = "UserEmail", length = 100, nullable = true)
     private String userEmail;

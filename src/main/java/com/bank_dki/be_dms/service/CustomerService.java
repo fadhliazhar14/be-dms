@@ -7,11 +7,13 @@ import com.bank_dki.be_dms.dto.CustomerDTO;
 import com.bank_dki.be_dms.entity.Customer;
 import com.bank_dki.be_dms.entity.Nomor;
 import com.bank_dki.be_dms.entity.Task;
+import com.bank_dki.be_dms.entity.User;
 import com.bank_dki.be_dms.exception.BusinessValidationException;
 import com.bank_dki.be_dms.exception.ResourceNotFoundException;
 import com.bank_dki.be_dms.repository.CustomerRepository;
 import com.bank_dki.be_dms.repository.NomorRepository;
 import com.bank_dki.be_dms.repository.TaskRepository;
+import com.bank_dki.be_dms.repository.UserRepository;
 import com.bank_dki.be_dms.util.CurrentUserUtils;
 import com.bank_dki.be_dms.util.PageUtil;
 import lombok.RequiredArgsConstructor;
@@ -38,8 +40,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CustomerService {
     private final CustomerRepository customerRepository;
-    private final TaskRepository taskRepository;
     private final NomorRepository nomorRepository;
+    private final UserRepository userRepository;
     private final CurrentUserUtils currentUserUtils;
 
 
@@ -242,17 +244,7 @@ public class CustomerService {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new BusinessValidationException("Customer not found"));
 
-        short last = nomorRepository.findMaxNomorLast();
-        short nextNumber = (short) (last + 1);
-
-        Nomor nomor = new Nomor();
-        nomor.setNomorLast(nextNumber);
-        nomorRepository.save(nomor);
-
-        LocalDate deliverDate = customer.getCustDeliverDate();
-        String formattedSeqDeliverDate = deliverDate.format(DateTimeFormatter.ofPattern("yyyy/MM"));
-        String formattedSeqNumber = String.format("%06d", nextNumber);
-        String custSeqNumber = currentUserUtils.getCurrentUsername() + "/" + formattedSeqDeliverDate + "/" + formattedSeqNumber;
+        String custSeqNumber = handlingSequenceNumber(customer);
 
         customer.setCustSeqNumber(custSeqNumber);
         customer.setCustStatus(CustomerStatus.REGISTER.getLabel());
@@ -484,5 +476,21 @@ public class CustomerService {
         customer.setCustAging(dto.getCustAging());
         customer.setCustDeliverDate(dto.getCustDeliverDate());
         customer.setCustIsDeleted(dto.getCustIsDeleted());
+    }
+
+    private String handlingSequenceNumber(Customer customer) {
+        short last = nomorRepository.findMaxNomorLast();
+        short nextNumber = (short) (last + 1);
+
+        Nomor nomor = new Nomor();
+        nomor.setNomorLast(nextNumber);
+        nomorRepository.save(nomor);
+
+        LocalDate deliverDate = customer.getCustDeliverDate();
+        String formattedSeqDeliverDate = deliverDate.format(DateTimeFormatter.ofPattern("yyyy/MM"));
+        String formattedSeqNumber = String.format("%06d", nextNumber);
+        User currentUser = userRepository.findByUserName(currentUserUtils.getCurrentUsername()).orElse(null);
+        String currentJobCode = currentUser != null ? currentUser.getUserJobCode() : "WI000";
+        return  currentJobCode + "/" + formattedSeqDeliverDate + "/" + formattedSeqNumber;
     }
 }
