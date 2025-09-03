@@ -116,7 +116,16 @@ public class CustomerController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<ApiResponse<Void>> registerCustomer(@PathVariable Short id) {
         customerService.registerCustomer(id);
-        ApiResponse<Void> response = ApiResponse.success("Customer has been successfully registered", null);
+        ApiResponse<Void> response = ApiResponse.success("Customer status has been successfully updated : Register", null);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/pengkinian/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
+    public ResponseEntity<ApiResponse<Void>> updateCustomerStatusPengkinian(@PathVariable Short id) {
+        customerService.updateCustomerStatusPengkinian(id);
+        ApiResponse<Void> response = ApiResponse.success("Customer status has been successfully updated : Pengkinian", null);
 
         return ResponseEntity.ok(response);
     }

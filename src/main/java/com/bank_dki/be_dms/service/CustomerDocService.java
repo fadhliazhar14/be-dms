@@ -1,5 +1,6 @@
 package com.bank_dki.be_dms.service;
 
+import com.bank_dki.be_dms.CustomerStatus;
 import com.bank_dki.be_dms.dto.CustomerDocDTO;
 import com.bank_dki.be_dms.entity.Customer;
 import com.bank_dki.be_dms.exception.BusinessValidationException;
@@ -27,6 +28,7 @@ public class CustomerDocService {
 
         customer.setCustFilePath(customerDocRequest.getDocFilePath());
         customer.setCustFileName(customerDocRequest.getDocFileName());
+        customer.setCustStatus(CustomerStatus.SCANNING.getLabel());
 
         customerRepository.save(customer);
 
@@ -39,6 +41,7 @@ public class CustomerDocService {
 
         customer.setCustFilePath(null);
         customer.setCustFileName(null);
+        customer.setCustStatus(CustomerStatus.REGISTER.getLabel());
 
         customerRepository.save(customer);
     }

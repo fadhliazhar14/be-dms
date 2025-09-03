@@ -1,5 +1,6 @@
 package com.bank_dki.be_dms.service;
 
+import com.bank_dki.be_dms.CustomerStatus;
 import com.bank_dki.be_dms.dto.PageRequestDTO;
 import com.bank_dki.be_dms.dto.PageResponseDTO;
 import com.bank_dki.be_dms.dto.CustomerDTO;
@@ -240,8 +241,6 @@ public class CustomerService {
     public void registerCustomer(Short id) {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new BusinessValidationException("Customer not found"));
-        Task status = taskRepository.findById((short) 4)
-                .orElseThrow(() -> new BusinessValidationException("Task not found"));
 
         short last = nomorRepository.findMaxNomorLast();
         short nextNumber = (short) (last + 1);
@@ -256,7 +255,17 @@ public class CustomerService {
         String custSeqNumber = "WI001/" + formattedSeqDeliverDate + "/" + formattedSeqNumber;
 
         customer.setCustSeqNumber(custSeqNumber);
-        customer.setCustStatus(status.getTaskName());
+        customer.setCustStatus(CustomerStatus.REGISTER.getLabel());
+        customer.setCustUpdateBy(currentUserUtils.getCurrentUsername());
+        customerRepository.save(customer);
+    }
+
+    public void updateCustomerStatusPengkinian(Short id) {
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new BusinessValidationException("Customer not found"));
+
+        customer.setCustStatus(CustomerStatus.PENGKINIAN.getLabel());
+        customer.setCustUpdateBy(currentUserUtils.getCurrentUsername());
         customerRepository.save(customer);
     }
     
