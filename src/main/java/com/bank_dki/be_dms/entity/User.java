@@ -77,7 +77,6 @@ public class User {
     @PrePersist
     protected void onCreate() {
         userCreateAt = LocalDateTime.now();
-        userUpdateAt = LocalDateTime.now();
     }
     
     @PreUpdate

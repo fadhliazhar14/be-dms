@@ -1,16 +1,15 @@
 package com.bank_dki.be_dms.controller;
 
 import com.bank_dki.be_dms.dto.*;
+import com.bank_dki.be_dms.entity.User;
 import com.bank_dki.be_dms.exception.BusinessValidationException;
 import com.bank_dki.be_dms.service.AuthService;
 import com.bank_dki.be_dms.service.RefreshTokenService;
+import com.bank_dki.be_dms.util.ApiResponse;
 import com.bank_dki.be_dms.util.JwtUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,8 +30,10 @@ public class AuthController {
     }
     
     @PostMapping("/signup")
-    public ResponseEntity<MessageResponse> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        MessageResponse response = authService.registerUser(signUpRequest);
+    public ResponseEntity<ApiResponse<UserDTO>> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+        UserDTO registeredUser = authService.registerUser(signUpRequest);
+        ApiResponse<UserDTO> response = ApiResponse.success("User has been successfully registered", registeredUser);
+
         return ResponseEntity.ok(response);
     }
 

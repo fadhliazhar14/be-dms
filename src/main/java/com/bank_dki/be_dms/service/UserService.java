@@ -135,7 +135,7 @@ public class UserService {
     
     public void deleteUser(Short id) {
         if (!userRepository.existsById(id)) {
-            throw new RuntimeException("User not found");
+            throw new ResourceNotFoundException("User not found");
         }
         userRepository.deleteById(id);
     }

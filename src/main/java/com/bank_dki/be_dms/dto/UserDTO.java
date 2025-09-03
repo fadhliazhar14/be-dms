@@ -13,8 +13,7 @@ public class UserDTO {
     private Short userId;
     private String userName;
     private String userEmail;
-    private LocalDateTime userCreateAt;
-    private LocalDateTime userUpdateAt;
+    private String userJobCode;
     private Boolean userIsActive;
     private Short roleId;
     private String userCreateBy;
@@ -23,4 +22,6 @@ public class UserDTO {
     private String userJabatan;
     private String userTempatLahir;
     private String roleName;
+    private LocalDateTime userCreateAt;
+    private LocalDateTime userUpdateAt;
 }

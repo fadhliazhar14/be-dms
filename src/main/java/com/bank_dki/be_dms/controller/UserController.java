@@ -3,6 +3,7 @@ package com.bank_dki.be_dms.controller;
 import com.bank_dki.be_dms.dto.PageRequestDTO;
 import com.bank_dki.be_dms.dto.PageResponseDTO;
 import com.bank_dki.be_dms.dto.*;
+import com.bank_dki.be_dms.entity.User;
 import com.bank_dki.be_dms.service.UserService;
 import com.bank_dki.be_dms.util.ApiResponse;
 import jakarta.validation.Valid;
@@ -57,9 +58,10 @@ public class UserController {
     
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Void>> createUser(@Valid @RequestBody UserCreateRequest request) {
-        userService.createUser(request);
-        ApiResponse<Void> response = ApiResponse.success("User created successfully!", null);
+    public ResponseEntity<ApiResponse<User>> createUser(@Valid @RequestBody UserCreateRequest request) {
+        User createdUser = userService.createUser(request);
+        ApiResponse<User> response = ApiResponse.success("User created successfully!", createdUser);
+
         return ResponseEntity.ok(response);
     }
     

@@ -1,15 +1,14 @@
 package com.bank_dki.be_dms.service;
 
-import com.bank_dki.be_dms.dto.JwtResponse;
-import com.bank_dki.be_dms.dto.LoginRequest;
-import com.bank_dki.be_dms.dto.MessageResponse;
-import com.bank_dki.be_dms.dto.SignupRequest;
+import com.bank_dki.be_dms.dto.*;
+import com.bank_dki.be_dms.dto.mapper.UserMapper;
 import com.bank_dki.be_dms.entity.RefreshToken;
 import com.bank_dki.be_dms.entity.Role;
 import com.bank_dki.be_dms.entity.User;
 import com.bank_dki.be_dms.exception.BusinessValidationException;
 import com.bank_dki.be_dms.repository.RoleRepository;
 import com.bank_dki.be_dms.repository.UserRepository;
+import com.bank_dki.be_dms.util.CurrentUserUtils;
 import com.bank_dki.be_dms.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,6 +30,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
+    private final CurrentUserUtils currentUserUtils;
     private final RefreshTokenService refreshTokenService;
     
     public JwtResponse authenticateUser(LoginRequest loginRequest) {
@@ -65,28 +65,31 @@ public class AuthService {
         );
     }
     
-    public MessageResponse registerUser(SignupRequest signUpRequest) {
+    public UserDTO registerUser(SignupRequest signUpRequest) {
         if (userRepository.existsByUserName(signUpRequest.getUserName())) {
-            return new MessageResponse("Error: Username is already taken!");
+            throw  new BusinessValidationException("Error: Username is already taken!");
         }
         
         if (userRepository.existsByUserEmail(signUpRequest.getUserEmail())) {
-            return new MessageResponse("Error: Email is already in use!");
+            throw  new BusinessValidationException("Error: Email is already in use!");
         }
         
         // Determine role ID
         Short roleId;
+        Role operatorRole;
         if (signUpRequest.getRoleId() != null) {
             // Validate if role exists
-            roleRepository.findById(signUpRequest.getRoleId())
+            operatorRole = roleRepository.findById(signUpRequest.getRoleId())
                     .orElseThrow(() -> new RuntimeException("Error: Role with ID " + signUpRequest.getRoleId() + " is not found."));
             roleId = signUpRequest.getRoleId();
         } else {
             // Default to OPERATOR role
-            Role operatorRole = roleRepository.findByRoleName("OPERATOR")
+            operatorRole = roleRepository.findByRoleName("OPERATOR")
                     .orElseThrow(() -> new BusinessValidationException("Error: Default OPERATOR role not found. Please ensure roles are initialized properly."));
             roleId = operatorRole.getRoleId();
         }
+
+        String currentUsername = currentUserUtils.getCurrentUsername();
         
         User user = new User();
         user.setUserName(signUpRequest.getUserName());
@@ -97,10 +100,17 @@ public class AuthService {
         user.setUserJabatan(signUpRequest.getUserJabatan());
         user.setUserTempatLahir(signUpRequest.getUserTempatLahir());
         user.setUserIsActive(true);
+        user.setUserCreateBy(currentUsername);
         
         userRepository.save(user);
-        
-        return new MessageResponse("User registered successfully!");
+
+        String formattedJobCode = String.format("%03d", user.getUserId());
+        user.setUserJobCode("WI" + formattedJobCode);
+
+        UserDTO dto = UserMapper.convertToDTO(userRepository.save(user));
+        dto.setRoleName(operatorRole.getRoleName());
+
+        return dto;
     }
 
     public JwtResponse.JwtResponseForRefresh generateNewAccessToken(String username) {
