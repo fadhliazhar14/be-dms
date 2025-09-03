@@ -7,6 +7,7 @@ import com.bank_dki.be_dms.entity.Customer;
 import com.bank_dki.be_dms.entity.Nomor;
 import com.bank_dki.be_dms.entity.Task;
 import com.bank_dki.be_dms.exception.BusinessValidationException;
+import com.bank_dki.be_dms.exception.ResourceNotFoundException;
 import com.bank_dki.be_dms.repository.CustomerRepository;
 import com.bank_dki.be_dms.repository.NomorRepository;
 import com.bank_dki.be_dms.repository.TaskRepository;
@@ -87,6 +88,13 @@ public class CustomerService {
     public Optional<CustomerDTO> getCustomerByCifNumber(String cifNumber) {
         return customerRepository.findByCustCifNumber(cifNumber)
                 .map(this::convertToDTO);
+    }
+
+    public CustomerDTO getCustomerByCustNoRek(String custNoRek) {
+        Customer customer = customerRepository.findByCustNoRek(custNoRek)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer with account number " + custNoRek + " not found."));
+
+        return convertToDTO(customer);
     }
     
     public Optional<CustomerDTO> getCustomerByNik(String nik) {

@@ -86,6 +86,15 @@ public class CustomerController {
                 .map(customer -> ResponseEntity.ok(ApiResponse.success("Success", customer)))
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/account-number/{custNoRek}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
+    public ResponseEntity<ApiResponse<CustomerDTO>> getCustomerByCustNoRek(@PathVariable String custNoRek) {
+        CustomerDTO customer = customerService.getCustomerByCustNoRek(custNoRek);
+        ApiResponse<CustomerDTO> response = ApiResponse.success("Success", customer);
+
+        return ResponseEntity.ok(response);
+    }
     
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
