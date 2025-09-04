@@ -1,5 +1,6 @@
 package com.bank_dki.be_dms.service;
 
+import com.bank_dki.be_dms.dto.LogCreateDTO;
 import com.bank_dki.be_dms.model.CustomerStatus;
 import com.bank_dki.be_dms.dto.PageRequestDTO;
 import com.bank_dki.be_dms.dto.PageResponseDTO;
@@ -9,12 +10,15 @@ import com.bank_dki.be_dms.entity.Nomor;
 import com.bank_dki.be_dms.entity.User;
 import com.bank_dki.be_dms.exception.BusinessValidationException;
 import com.bank_dki.be_dms.exception.ResourceNotFoundException;
+import com.bank_dki.be_dms.model.LogName;
 import com.bank_dki.be_dms.repository.CustomerRepository;
 import com.bank_dki.be_dms.repository.NomorRepository;
 import com.bank_dki.be_dms.repository.UserRepository;
 import com.bank_dki.be_dms.util.CurrentUserUtils;
 import com.bank_dki.be_dms.util.PageUtil;
+import com.bank_dki.be_dms.util.UsernameFormatter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -34,6 +38,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CustomerService {
@@ -41,6 +46,8 @@ public class CustomerService {
     private final NomorRepository nomorRepository;
     private final UserRepository userRepository;
     private final CurrentUserUtils currentUserUtils;
+    private final UsernameFormatter usernameFormatter;
+    private final LogService logService;
 
 
     public List<CustomerDTO> getAllCustomers() {
@@ -150,7 +157,7 @@ public class CustomerService {
                 customer.setPrsnNama(record.get("Nama"));
                 customer.setCustCifNumber(record.get("CIF Number"));
                 customer.setCustNoRek(record.get("Account Number"));
-                customer.setCustCreateBy(getFormattedUsername());
+                customer.setCustCreateBy(usernameFormatter.getFormattedUsername());
                 customer.setCustStatus(CustomerStatus.REGISTER.getLabel());
                 customer.setCustAging("0");
                 customer.setCustDeliverDate(LocalDate.now());
@@ -160,6 +167,11 @@ public class CustomerService {
             }
 
             customerRepository.saveAll(customers);
+
+            LogCreateDTO log = new LogCreateDTO();
+            log.setLogName(LogName.UPLOAD_CUSTOMER);
+            log.setLogNote("Uploading customers in CSV format");
+            logService.createLog(log);
         } catch (IOException e) {
             throw new BusinessValidationException("Failed to parse CSV file");
         }
@@ -244,8 +256,13 @@ public class CustomerService {
 
         customer.setCustSeqNumber(custSeqNumber);
         customer.setCustStatus(CustomerStatus.REGISTER.getLabel());
-        customer.setCustUpdateBy(getFormattedUsername());
+        customer.setCustUpdateBy(usernameFormatter.getFormattedUsername());
         customerRepository.save(customer);
+
+        LogCreateDTO log = new LogCreateDTO();
+        log.setLogName(LogName.CHANGE_CUSTOMER_STATUS);
+        log.setLogNote("Changing customer status to register");
+        logService.createLog(log);
     }
 
     public void updateCustomerStatusPengkinian(Short id) {
@@ -253,8 +270,14 @@ public class CustomerService {
                 .orElseThrow(() -> new BusinessValidationException("Customer not found"));
 
         customer.setCustStatus(CustomerStatus.PENGKINIAN.getLabel());
-        customer.setCustUpdateBy(getFormattedUsername());
+        customer.setCustUpdateBy(usernameFormatter.getFormattedUsername());
         customerRepository.save(customer);
+
+        LogCreateDTO log = new LogCreateDTO();
+        log.setLogName(LogName.CHANGE_CUSTOMER_STATUS);
+        log.setLogNote("Changing customer status to pengkinian");
+        logService.createLog(log);
+
     }
 
     public void updateCustomerStatusPengkaitan(Short id) {
@@ -262,8 +285,13 @@ public class CustomerService {
                 .orElseThrow(() -> new BusinessValidationException("Customer not found"));
 
         customer.setCustStatus(CustomerStatus.PENGKAITAN.getLabel());
-        customer.setCustUpdateBy(getFormattedUsername());
+        customer.setCustUpdateBy(usernameFormatter.getFormattedUsername());
         customerRepository.save(customer);
+
+        LogCreateDTO log = new LogCreateDTO();
+        log.setLogName(LogName.CHANGE_CUSTOMER_STATUS);
+        log.setLogNote("Changing customer status to pengkaitan");
+        logService.createLog(log);
     }
     
     public List<CustomerDTO> getCustomersByStatus(String status) {
@@ -488,12 +516,5 @@ public class CustomerService {
         User currentUser = userRepository.findByUserName(currentUserUtils.getCurrentUsername()).orElse(null);
         String currentJobCode = currentUser != null ? currentUser.getUserJobCode() : "WI000";
         return  currentJobCode + "/" + formattedSeqDeliverDate + "/" + formattedSeqNumber;
-    }
-
-    private String getFormattedUsername () {
-        User currentUser = userRepository.findByUserName(currentUserUtils.getCurrentUsername()).orElse(null);
-        return currentUser != null ?
-                currentUser.getUserName() + " - " + currentUser.getUserJobCode() :
-                "null";
     }
 }

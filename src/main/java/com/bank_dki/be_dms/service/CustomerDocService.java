@@ -1,13 +1,16 @@
 package com.bank_dki.be_dms.service;
 
+import com.bank_dki.be_dms.dto.LogCreateDTO;
 import com.bank_dki.be_dms.model.CustomerStatus;
 import com.bank_dki.be_dms.dto.CustomerDocDTO;
 import com.bank_dki.be_dms.entity.Customer;
 import com.bank_dki.be_dms.entity.User;
 import com.bank_dki.be_dms.exception.BusinessValidationException;
+import com.bank_dki.be_dms.model.LogName;
 import com.bank_dki.be_dms.repository.CustomerRepository;
 import com.bank_dki.be_dms.repository.UserRepository;
 import com.bank_dki.be_dms.util.CurrentUserUtils;
+import com.bank_dki.be_dms.util.UsernameFormatter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +19,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CustomerDocService {
     private final CustomerRepository customerRepository;
-    private final UserRepository userRepository;
-    private final CurrentUserUtils currentUserUtils;
+    private final UsernameFormatter usernameFormatter;
+    private final LogService logService;
 
     public CustomerDocDTO getDocByCustId(Short custId) {
         return customerRepository.findCustFileByCustId(custId)
@@ -31,9 +34,14 @@ public class CustomerDocService {
         customer.setCustFilePath(customerDocRequest.getDocFilePath());
         customer.setCustFileName(customerDocRequest.getDocFileName());
         customer.setCustStatus(CustomerStatus.SCANNING.getLabel());
-        customer.setCustUpdateBy(getFormattedUsername());
+        customer.setCustUpdateBy(usernameFormatter.getFormattedUsername());
 
         customerRepository.save(customer);
+
+        LogCreateDTO log = new LogCreateDTO();
+        log.setLogName(LogName.CHANGE_CUSTOMER_STATUS);
+        log.setLogNote("Changing customer status to scanning");
+        logService.createLog(log);
 
         return new CustomerDocDTO(customerDocRequest.getDocFilePath(), customerDocRequest.getDocFileName());
     }
@@ -47,12 +55,10 @@ public class CustomerDocService {
         customer.setCustStatus(CustomerStatus.REGISTER.getLabel());
 
         customerRepository.save(customer);
-    }
 
-    private String getFormattedUsername () {
-        User currentUser = userRepository.findByUserName(currentUserUtils.getCurrentUsername()).orElse(null);
-        return currentUser != null ?
-                currentUser.getUserName() + " - " + currentUser.getUserJobCode() :
-                "null";
+        LogCreateDTO log = new LogCreateDTO();
+        log.setLogName(LogName.CHANGE_CUSTOMER_STATUS);
+        log.setLogNote("Changing customer status to register");
+        logService.createLog(log);
     }
 }

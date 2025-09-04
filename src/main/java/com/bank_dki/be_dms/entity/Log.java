@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -52,6 +53,12 @@ public class Log {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TaskId", insertable = false, updatable = false)
     private Task task;
+
+    @PrePersist
+    private void onCreate() { logCreateDate = LocalDate.now(); }
+
+    @PreUpdate
+    private void onUpdate() { logUpdateDate = LocalDate.now(); }
     
     @Override
     public boolean equals(Object o) {
