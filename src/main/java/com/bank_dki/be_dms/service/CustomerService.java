@@ -210,7 +210,7 @@ public class CustomerService {
                 try {
                     csvPrinter.printRecord(
                             c.getCustId(),
-                            c.getCustSeqNumber(),
+                            c.getCustSeqNumber() == null || c.getCustSeqNumber().isEmpty() ? "Unregistered" : c.getCustSeqNumber(),
                             c.getPrsnNama(),
                             c.getCustCifNumber(),
                             c.getCustNoRek(),

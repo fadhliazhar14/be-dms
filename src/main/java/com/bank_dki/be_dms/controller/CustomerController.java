@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
@@ -203,8 +204,12 @@ public class CustomerController {
         pageRequest.setDateFrom(dateFrom);
         pageRequest.setDateTo(dateTo);
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        String formattedDate = LocalDate.now().format(formatter);
+        String filename = "customers_" + formattedDate + ".csv";
+
         response.setContentType("text/csv");
-        response.setHeader("Content-Disposition", "attachment; filename=customers.csv");
+        response.setHeader("Content-Disposition", "attachment; filename=" + filename);
 
         // Panggil service untuk langsung menulis ke response writer
         customerService.downloadCustomersToCsv(pageRequest, response.getWriter());
