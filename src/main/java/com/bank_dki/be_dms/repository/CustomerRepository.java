@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Short> {
@@ -110,6 +111,30 @@ public interface CustomerRepository extends JpaRepository<Customer, Short> {
             @Param("dateFrom") LocalDate dateFrom,
             @Param("dateTo") LocalDate dateTo,
             Pageable pageable
+    );
+
+    @Query("""
+    SELECT c 
+    FROM Customer c 
+    WHERE 
+        (:search IS NULL 
+        OR :search = ''  
+        OR LOWER(c.prsnNama) LIKE LOWER(CONCAT('%', :search, '%'))
+        OR c.custNoRek LIKE CONCAT('%', :search, '%'))
+        AND (c.custIsDeleted = false OR c.custIsDeleted IS NULL)
+        AND (:dateFrom IS NULL OR c.custDeliverDate >= :dateFrom)
+        AND (:dateTo IS NULL OR c.custDeliverDate <= :dateTo)
+        AND (
+            :isAdmin = true
+            OR c.custCreateBy = :createdBy
+        )
+""")
+    Stream<Customer> streamAllWithSearchAndDateRange(
+            @Param("createdBy") String createdBy,
+            @Param("isAdmin") boolean isAdmin,
+            @Param("search") String search,
+            @Param("dateFrom") LocalDate dateFrom,
+            @Param("dateTo") LocalDate dateTo
     );
 
     @Query("SELECT new com.bank_dki.be_dms.dto.CustomerDocDTO(c.custFilePath, c.custFileName) " +

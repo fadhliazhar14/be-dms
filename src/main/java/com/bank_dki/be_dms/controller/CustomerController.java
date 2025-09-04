@@ -6,6 +6,7 @@ import com.bank_dki.be_dms.dto.CustomerDTO;
 import com.bank_dki.be_dms.dto.MessageResponse;
 import com.bank_dki.be_dms.service.CustomerService;
 import com.bank_dki.be_dms.util.ApiResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -17,6 +18,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -182,15 +184,16 @@ public class CustomerController {
 
     @GetMapping("/download")
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
-    public ResponseEntity<byte[]> downloadCsv(
+    public void downloadCsv(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "id") String sort,
-            @RequestParam(defaultValue = "desc") String direction,
+            @RequestParam(defaultValue = "asc") String direction,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo
-    ) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
+            HttpServletResponse response
+    ) throws IOException {
         PageRequestDTO pageRequest = new PageRequestDTO();
         pageRequest.setPage(page);
         pageRequest.setSize(size);
@@ -200,11 +203,10 @@ public class CustomerController {
         pageRequest.setDateFrom(dateFrom);
         pageRequest.setDateTo(dateTo);
 
-        byte[] customersInCsv = customerService.downloadCustomersToCsv(pageRequest);
+        response.setContentType("text/csv");
+        response.setHeader("Content-Disposition", "attachment; filename=customers.csv");
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=customers.csv")
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(customersInCsv);
+        // Panggil service untuk langsung menulis ke response writer
+        customerService.downloadCustomersToCsv(pageRequest, response.getWriter());
     }
 }

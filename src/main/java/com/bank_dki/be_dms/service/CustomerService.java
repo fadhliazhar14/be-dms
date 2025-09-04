@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Slf4j
@@ -177,49 +179,57 @@ public class CustomerService {
         }
     }
 
-    public byte[] downloadCustomersToCsv(PageRequestDTO pageRequest) {
+    @Transactional(readOnly = true)
+    public void downloadCustomersToCsv(PageRequestDTO pageRequest, Writer writer) {
         String username = currentUserUtils.getCurrentUsername();
         boolean isAdmin = currentUserUtils.hasRole("ROLE_ADMIN");
-        Pageable pageable = PageUtil.createPageable(pageRequest);
 
-        List<Customer> customers =
-                customerRepository.findAllWithSearchAndDateRange(
+        try (
+                Stream<Customer> customerStream = customerRepository.streamAllWithSearchAndDateRange(
                         username,
                         isAdmin,
                         pageRequest.getSearch(),
                         pageRequest.getDateFrom(),
-                        pageRequest.getDateTo(),
-                        pageable
-                ).getContent();
-
-        try(ByteArrayOutputStream out = new ByteArrayOutputStream();) {
-            PrintWriter writer = new PrintWriter(out);
-
-            // Header
-            writer.println("NasabahId,SEQ Number,NasabahNama,NasabahCIF,NasabahAccount,StatusName,Operator,NasabahDeliveryDate");
-
+                        pageRequest.getDateTo()
+                );
+                CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(
+                        "NasabahId",
+                        "SEQ",
+                        "Number",
+                        "NasabahNama",
+                        "NasabahCIF",
+                        "NasabahAccount",
+                        "StatusName",
+                        "Operator",
+                        "NasabahDeliveryDate"
+                ))
+        ) {
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-            for (Customer c : customers) {
-                writer.printf("%s,%s,%s,%s,%s,%s,%s,%s%n",
-                        c.getCustId(),
-                        c.getCustSeqNumber(),
-                        c.getPrsnNama(),
-                        c.getCustCifNumber(),
-                        c.getCustNoRek(),
-                        c.getCustStatus(),
-                        c.getCustCreateBy(),
-                        c.getCustDeliverDate() != null ? c.getCustDeliverDate().format(dateFormatter) : ""
-                );
-            }
+            customerStream.forEach(c -> {
+                try {
+                    csvPrinter.printRecord(
+                            c.getCustId(),
+                            c.getCustSeqNumber(),
+                            c.getPrsnNama(),
+                            c.getCustCifNumber(),
+                            c.getCustNoRek(),
+                            c.getCustStatus(),
+                            c.getCustCreateBy(),
+                            c.getCustDeliverDate() != null ? c.getCustDeliverDate().format(dateFormatter) : ""
+                    );
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
 
-            writer.flush();
-            return out.toByteArray();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            csvPrinter.flush(); // flush ke writer
+
+        } catch (IOException e) {
+            throw new RuntimeException("Error exporting CSV", e);
         }
     }
-    
+
     public Customer updateCustomer(Short id, CustomerDTO customerDTO) {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
