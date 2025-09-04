@@ -6,6 +6,7 @@ import com.bank_dki.be_dms.entity.RefreshToken;
 import com.bank_dki.be_dms.entity.Role;
 import com.bank_dki.be_dms.entity.User;
 import com.bank_dki.be_dms.exception.BusinessValidationException;
+import com.bank_dki.be_dms.exception.ResourceNotFoundException;
 import com.bank_dki.be_dms.repository.RoleRepository;
 import com.bank_dki.be_dms.repository.UserRepository;
 import com.bank_dki.be_dms.util.CurrentUserUtils;
@@ -46,7 +47,7 @@ public class AuthService {
 
         User user = userRepository.findByUserNameOrEmailWithRole(
                 loginRequest.getUserEmail()
-        ).orElseThrow(() -> new RuntimeException("User not found"));
+        ).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getUserId());
 

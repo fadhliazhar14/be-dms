@@ -4,6 +4,7 @@ import com.bank_dki.be_dms.dto.*;
 import com.bank_dki.be_dms.entity.User;
 import com.bank_dki.be_dms.exception.BusinessValidationException;
 import com.bank_dki.be_dms.service.AuthService;
+import com.bank_dki.be_dms.service.PasswordResetService;
 import com.bank_dki.be_dms.service.RefreshTokenService;
 import com.bank_dki.be_dms.util.ApiResponse;
 import com.bank_dki.be_dms.util.JwtUtil;
@@ -22,6 +23,7 @@ public class AuthController {
     private final AuthService authService;
     private final RefreshTokenService refreshTokenService;
     private final JwtUtil jwtUtil;
+    private final PasswordResetService resetService;
     
     @PostMapping("/signin")
     public ResponseEntity<JwtResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -57,5 +59,21 @@ public class AuthController {
                     );
                 })
                 .orElseThrow(() -> new BusinessValidationException("Invalid refresh token"));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestParam String email) {
+        resetService.createPasswordResetToken(email);
+        ApiResponse<String> response = ApiResponse.success("Reset password link sent to email!", null);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<String>> resetPassword(@RequestBody ResetPasswordRequest request) {
+        resetService.resetPassword(request.getToken(), request.getNewPassword());
+        ApiResponse<String> response = ApiResponse.success("Password reset successfully!", null);
+
+        return ResponseEntity.ok(response);
     }
 }
